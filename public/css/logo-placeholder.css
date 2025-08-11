@@ -1,0 +1,73 @@
+/* DCS Logo Placeholder Styles */
+/* This file can be easily updated when the actual DCS logo is provided */
+
+.logo-placeholder {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--dcs-primary), var(--dcs-primary-dark));
+    border-radius: 8px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.logo-placeholder:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(30, 64, 175, 0.3);
+}
+
+/* When you have the actual DCS logo, replace the above with: */
+/*
+.logo-placeholder {
+    width: 40px;
+    height: 40px;
+    background-image: url('../images/dcs-logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 8px;
+}
+*/
+
+.brand-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1;
+    letter-spacing: 0.5px;
+}
+
+.brand-subtitle {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-weight: 400;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* DCS Brand Colors - Updated to match beautiful blue theme */
+:root {
+    --dcs-primary: #1e40af;      /* Beautiful blue */
+    --dcs-primary-dark: #1e3a8a; /* Darker blue */
+    --dcs-primary-light: #3b82f6; /* Lighter blue */
+    --dcs-accent: #dc2626;       /* Red accent from logo */
+    --dcs-accent-dark: #b91c1c;  /* Darker red */
+    --dcs-accent-light: #ef4444; /* Lighter red */
+    --dcs-secondary: #1f2937;    /* Dark text */
+    --dcs-success: #059669;      /* Green */
+    --dcs-warning: #d97706;      /* Orange */
+}
+
+/* Logo animation for loading */
+@keyframes logoPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.logo-placeholder.loading {
+    animation: logoPulse 2s infinite;
+} 
