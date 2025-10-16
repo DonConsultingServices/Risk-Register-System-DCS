@@ -1,0 +1,82 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Laravel
+.env
+.env.example
+.env.local
+.env.production
+.env.testing
+
+# Dependencies
+node_modules
+vendor
+
+# Storage and logs
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build artifacts
+public/hot
+public/storage
+public/build
+public/mix-manifest.json
+
+# Test files
+tests
+.phpunit.result.cache
+phpunit.xml
+
+# Documentation
+README.md
+*.md
+
+# Deployment files
+deploy.bat
+deploy.sh
+DEPLOYMENT_GUIDE.md
+PRODUCTION_CHECKLIST.md
+SETUP_GUIDE.md
+
+# Excel files
+*.xlsx
+*.xls
+
+# Logs
+logs/*
+*.log
+
+# Cache
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*

@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # Laravel Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dcs-risk-register-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    ports:
+      - "8000:80"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - dcs-network
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: dcs-risk-register-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: dcs_risk_register
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: dcs_user
+      MYSQL_PASSWORD: dcs_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - dcs-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: dcs-risk-register-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - dcs-network
+    command: redis-server --appendonly yes --requirepass redis_password
+
+  # Nginx (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: dcs-risk-register-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - app
+    networks:
+      - dcs-network
+
+  # PHPMyAdmin (Optional - for database management)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: dcs-risk-register-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: dcs_user
+      PMA_PASSWORD: dcs_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - dcs-network
+
+  # Mailhog (Optional - for email testing)
+  mailhog:
+    image: mailhog/mailhog
+    container_name: dcs-risk-register-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - dcs-network
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  dcs-network:
+    driver: bridge

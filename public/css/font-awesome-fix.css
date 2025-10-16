@@ -1,0 +1,119 @@
+/* Font Awesome Icon Fix - Fallback for when CDN fails to load */
+
+/* Ensure Font Awesome icons display properly */
+.fas, .far, .fal, .fab, .fa {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "FontAwesome", "FontAwesome5Free", "FontAwesome5Pro", sans-serif !important;
+    font-weight: 900 !important;
+    display: inline-block !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    font-style: normal !important;
+    font-variant: normal !important;
+    line-height: 1 !important;
+    speak: none !important;
+}
+
+.far {
+    font-weight: 400 !important;
+}
+
+.fal {
+    font-weight: 300 !important;
+}
+
+.fab {
+    font-weight: 400 !important;
+}
+
+/* Specific icon fixes for common icons used in the system */
+.fa-tachometer-alt::before { content: "\f3fd"; }
+.fa-users::before { content: "\f0c0"; }
+.fa-exclamation-triangle::before { content: "\f071"; }
+.fa-folder::before { content: "\f07b"; }
+.fa-chart-bar::before { content: "\f080"; }
+.fa-envelope::before { content: "\f0e0"; }
+.fa-cog::before { content: "\f013"; }
+.fa-bars::before { content: "\f0c9"; }
+.fa-bell::before { content: "\f0f3"; }
+.fa-user::before { content: "\f007"; }
+.fa-question-circle::before { content: "\f059"; }
+.fa-info-circle::before { content: "\f41c"; }
+.fa-sign-out-alt::before { content: "\f2f5"; }
+.fa-check-circle::before { content: "\f058"; }
+.fa-spinner::before { content: "\f110"; }
+.fa-plus::before { content: "\f067"; }
+.fa-eye::before { content: "\f06e"; }
+.fa-edit::before { content: "\f044"; }
+.fa-trash::before { content: "\f1f8"; }
+.fa-search::before { content: "\f002"; }
+.fa-times::before { content: "\f00d"; }
+.fa-sync-alt::before { content: "\f2f1"; }
+.fa-bolt::before { content: "\f0e7"; }
+.fa-clipboard-check::before { content: "\f46d"; }
+.fa-exclamation-circle::before { content: "\f06a"; }
+.fa-arrow-left::before { content: "\f060"; }
+.fa-save::before { content: "\f0c7"; }
+.fa-calculator::before { content: "\f1ec"; }
+.fa-eraser::before { content: "\f12d"; }
+.fa-check::before { content: "\f00c"; }
+.fa-play::before { content: "\f04b"; }
+.fa-pause::before { content: "\f04c"; }
+.fa-redo::before { content: "\f01e"; }
+.fa-times-circle::before { content: "\f057"; }
+.fa-download::before { content: "\f019"; }
+.fa-chevron-down::before { content: "\f078"; }
+.fa-chevron-up::before { content: "\f077"; }
+.fa-arrows-alt-h::before { content: "\f337"; }
+.fa-shield-alt::before { content: "\f3ed"; }
+.fa-plus-circle::before { content: "\f055"; }
+.fa-external-link-alt::before { content: "\f35d"; }
+.fa-chart-line::before { content: "\f201"; }
+.fa-cogs::before { content: "\f085"; }
+.fa-user-shield::before { content: "\f505"; }
+.fa-credit-card::before { content: "\f09d"; }
+.fa-truck::before { content: "\f0d1"; }
+.fa-bullhorn::before { content: "\f0a1"; }
+.fa-archive::before { content: "\f187"; }
+.fa-bell-slash::before { content: "\f1f6"; }
+.fa-filter::before { content: "\f0b0"; }
+.fa-history::before { content: "\f1da"; }
+
+/* Animation for spinner */
+.fa-spin {
+    animation: fa-spin 2s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Ensure icons are visible and properly sized */
+.nav-link i,
+.stat-icon,
+.action-btn i,
+.quick-action-btn i {
+    font-size: inherit !important;
+    width: auto !important;
+    height: auto !important;
+    line-height: 1 !important;
+}
+
+/* Fix for dashboard stat icons */
+.stat-icon {
+    font-size: 2.5rem !important;
+    opacity: 0.8 !important;
+}
+
+/* Fix for navigation icons */
+.nav-link i {
+    width: 20px !important;
+    margin-right: 12px !important;
+    font-size: 1rem !important;
+}
+
+/* Fix for action button icons */
+.action-btn i {
+    font-size: 1.2rem !important;
+    margin-right: 0.5rem !important;
+}
