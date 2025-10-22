@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Cache;
 use App\Services\ComprehensiveRiskAssessmentService;
 use App\Services\RiskClassificationService;
 use Carbon\Carbon;
+use PDF;
+use Excel;
 
 class RiskController extends Controller
 {
@@ -1183,6 +1185,81 @@ class RiskController extends Controller
         } catch (\Exception $e) {
             Log::error('Bulk export failed for risks', ['error' => $e->getMessage()]);
             return back()->with('error', 'Failed to export selected risks. Please try again.');
+        }
+    }
+
+    /**
+     * Export all risks as PDF
+     */
+    public function exportPdf(Request $request)
+    {
+        try {
+            $query = Risk::with(['client', 'assignedUser', 'category']);
+            
+            // Apply filters if any
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+            if ($request->filled('risk_rating')) {
+                $query->where('risk_rating', $request->risk_rating);
+            }
+            if ($request->filled('client_id')) {
+                $query->where('client_id', $request->client_id);
+            }
+            
+            $risks = $query->get();
+            
+            $data = [
+                'risks' => $risks,
+                'exported_at' => now()->format('Y-m-d H:i:s'),
+                'exported_by' => auth()->user()->name,
+                'total_risks' => $risks->count(),
+                'high_risk_count' => $risks->where('risk_rating', 'High')->count(),
+                'medium_risk_count' => $risks->where('risk_rating', 'Medium')->count(),
+                'low_risk_count' => $risks->where('risk_rating', 'Low')->count(),
+            ];
+            
+            $pdf = \PDF::loadView('risks.exports.pdf', $data);
+            $pdf->setPaper('A4', 'landscape');
+            
+            $filename = 'risk_assessments_report_' . now()->format('Y-m-d_H-i-s') . '.pdf';
+            
+            return $pdf->download($filename);
+            
+        } catch (\Exception $e) {
+            Log::error('PDF export failed for risks', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Failed to export risk assessments as PDF. Please try again.');
+        }
+    }
+
+    /**
+     * Export all risks as Excel
+     */
+    public function exportExcel(Request $request)
+    {
+        try {
+            $query = Risk::with(['client', 'assignedUser', 'category']);
+            
+            // Apply filters if any
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+            if ($request->filled('risk_rating')) {
+                $query->where('risk_rating', $request->risk_rating);
+            }
+            if ($request->filled('client_id')) {
+                $query->where('client_id', $request->client_id);
+            }
+            
+            $risks = $query->get();
+            
+            $filename = 'risk_assessments_report_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+            
+            return \Excel::download(new \App\Exports\RisksExport($risks), $filename);
+            
+        } catch (\Exception $e) {
+            Log::error('Excel export failed for risks', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Failed to export risk assessments as Excel. Please try again.');
         }
     }
 

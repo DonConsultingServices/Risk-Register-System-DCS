@@ -5,6 +5,128 @@
 
 <?php $__env->startSection('content'); ?>
 <style>
+    @media print {
+        body {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .no-print {
+            display: none !important;
+        }
+        
+        .print-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        
+        .print-header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .print-header .subtitle {
+            color: #666;
+            margin: 5px 0 0 0;
+            font-size: 14px;
+        }
+        
+        .print-summary {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .print-summary h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .print-summary-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        
+        .print-stat-item {
+            text-align: center;
+        }
+        
+        .print-stat-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .print-stat-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .print-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 10px;
+        }
+        
+        .print-table th, .print-table td {
+            border: 1px solid #333;
+            padding: 6px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        .print-table th {
+            background-color: #333;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 9px;
+        }
+        
+        .print-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .print-risk-high { background-color: #ffebee; }
+        .print-risk-medium { background-color: #fff3e0; }
+        .print-risk-low { background-color: #e8f5e8; }
+        
+        .print-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .print-risk-rating {
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+            font-size: 8px;
+            text-transform: uppercase;
+        }
+        
+        .print-rating-high { background-color: #e74c3c; color: white; }
+        .print-rating-medium { background-color: #f39c12; color: white; }
+        .print-rating-low { background-color: #27ae60; color: white; }
+        .print-rating-critical { background-color: #8e44ad; color: white; }
+        
+        .page-break {
+            page-break-before: always;
+        }
+    }
+</style>
+<style>
     .page-header {
         background: linear-gradient(135deg, var(--logo-dark-blue-primary), var(--logo-dark-blue-secondary));
         color: white;
@@ -642,135 +764,6 @@
         </div>
     </div>
 
-    <!-- Rejected Clients Analysis Section -->
-    <?php if($rejectedClients && $rejectedClients->count() > 0): ?>
-    <div class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="text-danger mb-0">
-                <i class="fas fa-user-times me-2"></i>Rejected Clients Analysis
-                <small class="text-muted">(<?php echo e($rejectedClients->count()); ?> rejected clients)</small>
-            </h5>
-            <button class="btn btn-sm btn-outline-danger" onclick="refreshRejectedClients()" title="Refresh Rejected Clients Data">
-                <i class="fas fa-sync-alt me-1"></i>Refresh
-            </button>
-        </div>
-        
-        <!-- Rejection Categories Breakdown -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-danger text-white">
-                        <h6 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Risk Categories Leading to Rejections</h6>
-                    </div>
-                    <div class="card-body">
-                        <?php if($rejectionCategories && $rejectionCategories->count() > 0): ?>
-                            <div class="row">
-                                <?php $__currentLoopData = $rejectionCategories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="card border-danger">
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title text-danger"><?php echo e($category->risk_category ?: 'Uncategorized'); ?></h6>
-                                            <h4 class="text-danger"><?php echo e($category->count); ?></h4>
-                                            <small class="text-muted">Risks</small>
-                                            <?php if($category->avg_score): ?>
-                                                <br><small class="text-muted">Avg: <?php echo e(number_format($category->avg_score, 1)); ?></small>
-                                            <?php endif; ?>
-                                            <?php if($category->max_score): ?>
-                                                <br><small class="text-muted">Max: <?php echo e(number_format($category->max_score, 1)); ?></small>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </div>
-                            <div class="mt-3">
-                                <small class="text-muted">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Showing risk categories that led to client rejections. Higher scores indicate greater risk.
-                                </small>
-                            </div>
-                        <?php else: ?>
-                            <div class="text-center text-muted py-4">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <div>No risk category data available for rejected clients</div>
-                                <small class="d-block mt-2">This could mean rejected clients had no associated risks or the data needs to be refreshed.</small>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Detailed Rejected Clients List -->
-        <div class="card">
-            <div class="card-header bg-danger text-white">
-                <h6 class="mb-0"><i class="fas fa-list me-2"></i>Detailed Rejected Clients List</h6>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Client Name</th>
-                                <th>Company</th>
-                                <th>Total Risk Score</th>
-                                <th>Highest Risk Category</th>
-                                <th>Risk Count</th>
-                                <th>Rejection Reason</th>
-                                <th>Rejected Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php $__currentLoopData = $rejectedClients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $client): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <tr>
-                                <td>
-                                    <div class="client-info">
-                                        <div class="client-name fw-bold"><?php echo e($client->name); ?></div>
-                                        <div class="client-email text-muted small"><?php echo e($client->email); ?></div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="text-muted"><?php echo e($client->company ?: 'Individual'); ?></span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-danger fs-6"><?php echo e($client->total_risk_score ?? 0); ?></span>
-                                </td>
-                                <td>
-                                    <?php if(isset($client->highest_risk_category) && $client->highest_risk_category): ?>
-                                        <span class="badge bg-warning"><?php echo e($client->highest_risk_category); ?></span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary">No Risks</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info"><?php echo e(is_array($client->risks ?? null) ? count($client->risks) : ($client->risks->count() ?? 0)); ?></span>
-                                </td>
-                                <td>
-                                    <span class="text-muted"><?php echo e($client->rejection_reason ?: 'High risk assessment'); ?></span>
-                                </td>
-                                <td>
-                                    <span class="text-muted"><?php echo e((isset($client->updated_at) && method_exists($client->updated_at, 'format')) ? $client->updated_at->format('M d, Y') : (\Carbon\Carbon::parse($client->updated_at ?? now())->format('M d, Y'))); ?></span>
-                                </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-sm btn-outline-primary" onclick="showRejectedClientDetails(<?php echo e($client->id); ?>)" title="View Risk Details">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <a href="<?php echo e(route('clients.show', ['client' => $client->id])); ?>" class="btn btn-sm btn-outline-success" title="View Client">
-                                            <i class="fas fa-user"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
 
     <!-- Quick Actions -->
     <div class="row mb-4">
@@ -780,17 +773,23 @@
                     <h5 class="card-title mb-3"><i class="fas fa-download me-2"></i>Export & Compliance Reports</h5>
                     <div class="d-flex flex-wrap gap-2">
                         <a href="<?php echo e(route('risks.export.csv')); ?>" class="btn btn-outline-primary">
-                            <i class="fas fa-file-csv me-1"></i>Export All Risks (CSV)
+                            <i class="fas fa-file-csv me-1"></i>Export CSV
                         </a>
-                        <a href="<?php echo e(route('clients.index')); ?>" class="btn btn-outline-success">
-                            <i class="fas fa-users me-1"></i>View All Clients
+                        <a href="<?php echo e(route('risks.export.excel')); ?>" class="btn btn-outline-success">
+                            <i class="fas fa-file-excel me-1"></i>Export Excel
                         </a>
-                        <a href="<?php echo e(route('risks.index')); ?>" class="btn btn-outline-info">
-                            <i class="fas fa-plus me-1"></i>Add New Risk Assessment
+                        <a href="<?php echo e(route('risks.export.pdf')); ?>" class="btn btn-outline-danger">
+                            <i class="fas fa-file-pdf me-1"></i>Export PDF
                         </a>
-                        <button class="btn btn-outline-warning" onclick="window.print()">
+                        <button class="btn btn-outline-warning" onclick="printReport()">
                             <i class="fas fa-print me-1"></i>Print Report
                         </button>
+                        <a href="<?php echo e(route('clients.index')); ?>" class="btn btn-outline-info">
+                            <i class="fas fa-users me-1"></i>View All Clients
+                        </a>
+                        <a href="<?php echo e(route('risks.index')); ?>" class="btn btn-outline-secondary">
+                            <i class="fas fa-plus me-1"></i>Add New Risk Assessment
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1124,132 +1123,71 @@ document.getElementById('approvalFilter').addEventListener('change', function() 
     }
 });
 
-// Function to show rejected client details
-function showRejectedClientDetails(clientId) {
-    // Find the client data from the rejected clients
-    const rejectedClients = <?php echo json_encode($rejectedClients, 15, 512) ?>;
-    const client = rejectedClients.find(c => c.id === clientId);
-    
-    if (!client) {
-        alert('Client data not found');
-        return;
-    }
-    
-    // Build the modal content
-    let content = `
-        <div class="row">
-            <div class="col-md-6">
-                <h6 class="text-primary">Client Information</h6>
-                <p><strong>Name:</strong> ${client.name}</p>
-                <p><strong>Email:</strong> ${client.email || 'N/A'}</p>
-                <p><strong>Company:</strong> ${client.company || 'Individual'}</p>
-                <p><strong>Total Risk Score:</strong> <span class="badge bg-danger">${client.total_risk_score || 0}</span></p>
-                <p><strong>Risk Count:</strong> <span class="badge bg-info">${client.risks.length}</span></p>
-                <p><strong>Rejection Reason:</strong> ${client.rejection_reason || 'High risk assessment'}</p>
-            </div>
-            <div class="col-md-6">
-                <h6 class="text-primary">Risk Categories Breakdown</h6>
-    `;
-    
-    // Add risk categories breakdown
-    if (client.risk_categories_breakdown && Object.keys(client.risk_categories_breakdown).length > 0) {
-        Object.values(client.risk_categories_breakdown).forEach(category => {
-            content += `
-                <div class="mb-2 p-2 border rounded">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="badge bg-warning me-2">${category.category || 'Uncategorized'}</span>
-                        <span class="text-muted">${category.count} risks</span>
-                    </div>
-                    <div class="small text-muted mt-1">
-                        Avg Score: <strong>${category.avg_score ? category.avg_score.toFixed(1) : 'N/A'}</strong>
-                        ${category.max_score ? ` | Max Score: <strong>${category.max_score.toFixed(1)}</strong>` : ''}
-                    </div>
-                </div>
-            `;
-        });
-    } else {
-        content += '<p class="text-muted"><i class="fas fa-info-circle me-1"></i>No risk categories available for this client</p>';
-    }
-    
-    content += `
-            </div>
-        </div>
-        <hr>
-        <h6 class="text-primary">Individual Risk Details</h6>
-        <div class="table-responsive">
-            <table class="table table-sm">
-                <thead>
-                    <tr>
-                        <th>Risk Title</th>
-                        <th>Category</th>
-                        <th>Impact</th>
-                        <th>Likelihood</th>
-                        <th>Score</th>
-                        <th>Rating</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-    
-    // Add individual risks
-    if (client.risks && client.risks.length > 0) {
-        client.risks.forEach(risk => {
-            content += `
-                <tr>
-                    <td><strong>${risk.title || 'Untitled Risk'}</strong></td>
-                    <td><span class="badge bg-secondary">${risk.risk_category || 'Uncategorized'}</span></td>
-                    <td><span class="badge bg-info">${risk.impact || 'N/A'}</span></td>
-                    <td><span class="badge bg-warning">${risk.likelihood || 'N/A'}</span></td>
-                    <td><span class="badge bg-primary">${risk.risk_score || 0}</span></td>
-                    <td><span class="badge bg-${getRiskRatingColor(risk.risk_rating)}">${risk.risk_rating || 'N/A'}</span></td>
-                </tr>
-            `;
-        });
-    } else {
-        content += '<tr><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-info-circle me-1"></i>No individual risk details available for this client</td></tr>';
-    }
-    
-    content += `
-                </tbody>
-            </table>
-        </div>
-    `;
-    
-    // Set the modal content and show it
-    document.getElementById('rejectedClientDetails').innerHTML = content;
-    
-    // Clean up any existing modals first
-    cleanupModals();
-    
-    const modalElement = document.getElementById('rejectedClientModal');
-    const modal = new bootstrap.Modal(modalElement, {
-        backdrop: true,
-        keyboard: true,
-        focus: true
-    });
-    
-    // Add cleanup event listener
-    modalElement.addEventListener('hidden.bs.modal', function() {
-        cleanupModals();
-    });
-    
-    modal.show();
-}
+// Removed rejected client functions
 
-// Function to refresh rejected clients data
-function refreshRejectedClients() {
-    const refreshBtn = document.querySelector('button[onclick="refreshRejectedClients()"]');
-    const originalText = refreshBtn.innerHTML;
+// Print function for better printing experience
+function printReport() {
+    // Add print-specific classes to elements
+    const pageHeader = document.querySelector('.page-header');
+    if (pageHeader) {
+        pageHeader.classList.add('print-header');
+    }
     
-    refreshBtn.disabled = true;
-    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Refreshing...';
+    const summaryCards = document.querySelectorAll('.summary-card');
+    summaryCards.forEach(card => {
+        card.classList.add('print-summary');
+    });
     
-    // Add refresh parameter to current URL
-    const currentUrl = new URL(window.location);
-    currentUrl.searchParams.set('refresh_rejected', 'true');
+    const dataTable = document.querySelector('.table');
+    if (dataTable) {
+        dataTable.classList.add('print-table');
+    }
     
-    // Reload the page with refresh parameter
-    window.location.href = currentUrl.toString();
+    // Add print-specific classes to risk rating badges
+    const riskBadges = document.querySelectorAll('.badge');
+    riskBadges.forEach(badge => {
+        if (badge.textContent.includes('High') || badge.textContent.includes('Medium') || badge.textContent.includes('Low')) {
+            badge.classList.add('print-risk-rating');
+            if (badge.textContent.includes('High')) {
+                badge.classList.add('print-rating-high');
+            } else if (badge.textContent.includes('Medium')) {
+                badge.classList.add('print-rating-medium');
+            } else if (badge.textContent.includes('Low')) {
+                badge.classList.add('print-rating-low');
+            }
+        }
+    });
+    
+    // Add print-specific classes to risk rows
+    const riskRows = document.querySelectorAll('tbody tr');
+    riskRows.forEach(row => {
+        const ratingCell = row.querySelector('.badge');
+        if (ratingCell) {
+            if (ratingCell.textContent.includes('High')) {
+                row.classList.add('print-risk-high');
+            } else if (ratingCell.textContent.includes('Medium')) {
+                row.classList.add('print-risk-medium');
+            } else if (ratingCell.textContent.includes('Low')) {
+                row.classList.add('print-risk-low');
+            }
+        }
+    });
+    
+    // Print the page
+    window.print();
+    
+    // Clean up print classes after printing
+    setTimeout(() => {
+        pageHeader?.classList.remove('print-header');
+        summaryCards.forEach(card => card.classList.remove('print-summary'));
+        dataTable?.classList.remove('print-table');
+        riskBadges.forEach(badge => {
+            badge.classList.remove('print-risk-rating', 'print-rating-high', 'print-rating-medium', 'print-rating-low');
+        });
+        riskRows.forEach(row => {
+            row.classList.remove('print-risk-high', 'print-risk-medium', 'print-risk-low');
+        });
+    }, 1000);
 }
 
 // Helper function to get risk rating color

@@ -94,6 +94,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/risks/{risk}/export', [RiskController::class, 'export'])->name('risks.export');
     Route::post('/risks/bulk-export', [RiskController::class, 'bulkExport'])->name('risks.bulk-export');
     Route::get('/risks-export/csv', [RiskController::class, 'exportCsv'])->name('risks.export.csv');
+    Route::get('/risks-export/pdf', [RiskController::class, 'exportPdf'])->name('risks.export.pdf');
+    Route::get('/risks-export/excel', [RiskController::class, 'exportExcel'])->name('risks.export.excel');
     
     
     // Risk Categories (Manager/Admin only)

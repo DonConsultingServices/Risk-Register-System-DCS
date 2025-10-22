@@ -5,6 +5,128 @@
 
 @section('content')
 <style>
+    @media print {
+        body {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .no-print {
+            display: none !important;
+        }
+        
+        .print-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        
+        .print-header h1 {
+            color: #333;
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .print-header .subtitle {
+            color: #666;
+            margin: 5px 0 0 0;
+            font-size: 14px;
+        }
+        
+        .print-summary {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .print-summary h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .print-summary-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        
+        .print-stat-item {
+            text-align: center;
+        }
+        
+        .print-stat-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .print-stat-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .print-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 10px;
+        }
+        
+        .print-table th, .print-table td {
+            border: 1px solid #333;
+            padding: 6px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        .print-table th {
+            background-color: #333;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 9px;
+        }
+        
+        .print-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .print-risk-high { background-color: #ffebee; }
+        .print-risk-medium { background-color: #fff3e0; }
+        .print-risk-low { background-color: #e8f5e8; }
+        
+        .print-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .print-risk-rating {
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+            font-size: 8px;
+            text-transform: uppercase;
+        }
+        
+        .print-rating-high { background-color: #e74c3c; color: white; }
+        .print-rating-medium { background-color: #f39c12; color: white; }
+        .print-rating-low { background-color: #27ae60; color: white; }
+        .print-rating-critical { background-color: #8e44ad; color: white; }
+        
+        .page-break {
+            page-break-before: always;
+        }
+    }
+</style>
+<style>
     .page-header {
         background: linear-gradient(135deg, var(--logo-dark-blue-primary), var(--logo-dark-blue-secondary));
         color: white;
@@ -644,24 +766,30 @@
 
 
     <!-- Quick Actions -->
-    <div class="row mb-4">
+    <div class="row mb-4 no-print">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title mb-3"><i class="fas fa-download me-2"></i>Export & Compliance Reports</h5>
                     <div class="d-flex flex-wrap gap-2">
                         <a href="{{ route('risks.export.csv') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-file-csv me-1"></i>Export All Risks (CSV)
+                            <i class="fas fa-file-csv me-1"></i>Export CSV
                         </a>
-                        <a href="{{ route('clients.index') }}" class="btn btn-outline-success">
-                            <i class="fas fa-users me-1"></i>View All Clients
+                        <a href="{{ route('risks.export.excel') }}" class="btn btn-outline-success">
+                            <i class="fas fa-file-excel me-1"></i>Export Excel
                         </a>
-                        <a href="{{ route('risks.index') }}" class="btn btn-outline-info">
-                            <i class="fas fa-plus me-1"></i>Add New Risk Assessment
+                        <a href="{{ route('risks.export.pdf') }}" class="btn btn-outline-danger">
+                            <i class="fas fa-file-pdf me-1"></i>Export PDF
                         </a>
-                        <button class="btn btn-outline-warning" onclick="window.print()">
+                        <button class="btn btn-outline-warning" onclick="printReport()">
                             <i class="fas fa-print me-1"></i>Print Report
                         </button>
+                        <a href="{{ route('clients.index') }}" class="btn btn-outline-info">
+                            <i class="fas fa-users me-1"></i>View All Clients
+                        </a>
+                        <a href="{{ route('risks.index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-plus me-1"></i>Add New Risk Assessment
+                        </a>
                     </div>
                 </div>
             </div>
@@ -669,7 +797,7 @@
     </div>
 
     <!-- Filter Controls -->
-    <div class="filter-section mb-4">
+    <div class="filter-section mb-4 no-print">
         <div class="card">
             <div class="card-header">
                 <h6 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Reports</h6>
@@ -991,6 +1119,71 @@ document.getElementById('approvalFilter').addEventListener('change', function() 
 });
 
 // Removed rejected client functions
+
+// Print function for better printing experience
+function printReport() {
+    // Add print-specific classes to elements
+    const pageHeader = document.querySelector('.page-header');
+    if (pageHeader) {
+        pageHeader.classList.add('print-header');
+    }
+    
+    const summaryCards = document.querySelectorAll('.summary-card');
+    summaryCards.forEach(card => {
+        card.classList.add('print-summary');
+    });
+    
+    const dataTable = document.querySelector('.table');
+    if (dataTable) {
+        dataTable.classList.add('print-table');
+    }
+    
+    // Add print-specific classes to risk rating badges
+    const riskBadges = document.querySelectorAll('.badge');
+    riskBadges.forEach(badge => {
+        if (badge.textContent.includes('High') || badge.textContent.includes('Medium') || badge.textContent.includes('Low')) {
+            badge.classList.add('print-risk-rating');
+            if (badge.textContent.includes('High')) {
+                badge.classList.add('print-rating-high');
+            } else if (badge.textContent.includes('Medium')) {
+                badge.classList.add('print-rating-medium');
+            } else if (badge.textContent.includes('Low')) {
+                badge.classList.add('print-rating-low');
+            }
+        }
+    });
+    
+    // Add print-specific classes to risk rows
+    const riskRows = document.querySelectorAll('tbody tr');
+    riskRows.forEach(row => {
+        const ratingCell = row.querySelector('.badge');
+        if (ratingCell) {
+            if (ratingCell.textContent.includes('High')) {
+                row.classList.add('print-risk-high');
+            } else if (ratingCell.textContent.includes('Medium')) {
+                row.classList.add('print-risk-medium');
+            } else if (ratingCell.textContent.includes('Low')) {
+                row.classList.add('print-risk-low');
+            }
+        }
+    });
+    
+    // Print the page
+    window.print();
+    
+    // Clean up print classes after printing
+    setTimeout(() => {
+        pageHeader?.classList.remove('print-header');
+        summaryCards.forEach(card => card.classList.remove('print-summary'));
+        dataTable?.classList.remove('print-table');
+        riskBadges.forEach(badge => {
+            badge.classList.remove('print-risk-rating', 'print-rating-high', 'print-rating-medium', 'print-rating-low');
+        });
+        riskRows.forEach(row => {
+            row.classList.remove('print-risk-high', 'print-risk-medium', 'print-risk-low');
+        });
+    }, 1000);
+}
 
 // Helper function to get risk rating color
 function getRiskRatingColor(rating) {

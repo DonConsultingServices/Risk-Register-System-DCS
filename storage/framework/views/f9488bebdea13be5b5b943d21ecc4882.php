@@ -8,6 +8,11 @@
                     <div class="footer-logo-container">
                         <img src="<?php echo e(asset('logo/logo.png')); ?>" alt="DCS Logo" class="footer-logo">
                     </div>
+                    <p>
+                        <a href="https://www.dcs.com.na" target="_blank" class="footer-link">
+                            <i class="fas fa-globe me-2"></i>www.dcs.com.na
+                        </a>
+                    </p>
                 </div>
             </div>
             
@@ -18,8 +23,11 @@
                     <li><a href="mailto:ITSupport@dcs.com.na" class="footer-link">
                         <i class="fas fa-envelope me-2"></i>ITSupport@dcs.com.na
                     </a></li>
-                    <li><a href="tel:+264612345678" class="footer-link">
-                        <i class="fas fa-phone me-2"></i>+264 61 234 5678
+                    <li><a href="mailto:info@dcs.com.na" class="footer-link">
+                        <i class="fas fa-envelope me-2"></i>info@dcs.com.na
+                    </a></li>
+                    <li><a href="tel:+26461302391" class="footer-link">
+                        <i class="fas fa-phone me-2"></i>061-302 391
                     </a></li>
                 </ul>
             </div>
@@ -30,11 +38,14 @@
                 <div class="footer-contact">
                     <p class="footer-text">
                         <i class="fas fa-map-marker-alt me-2"></i>
+                        No 41, Johann and Sturrock<br>
                         Windhoek, Namibia
                     </p>
                     <p class="footer-text">
                         <i class="fas fa-clock me-2"></i>
-                        Mon - Fri: 8:00 AM - 5:00 PM
+                        Mon-Thu: 09h00 - 16h00<br>
+                        Fri: 08h00 - 13h00<br>
+                        Weekends & Public Holidays: Closed
                     </p>
                 </div>
             </div>
@@ -76,11 +87,13 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 2rem;
+    gap: 2rem;
 }
 
 .footer-column {
     flex: 1;
-    padding: 0 1rem;
+    padding: 0;
+    text-align: left;
 }
 
 .footer-brand {
@@ -161,6 +174,13 @@
 
 .footer-links li {
     margin-bottom: 0.75rem;
+    list-style: none;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .footer-link {
@@ -187,7 +207,8 @@
     font-size: 0.9rem;
     margin-bottom: 0.75rem;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    line-height: 1.4;
 }
 
 .footer-bottom {
