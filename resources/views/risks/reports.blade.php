@@ -1122,67 +1122,233 @@ document.getElementById('approvalFilter').addEventListener('change', function() 
 
 // Print function for better printing experience
 function printReport() {
-    // Add print-specific classes to elements
-    const pageHeader = document.querySelector('.page-header');
-    if (pageHeader) {
-        pageHeader.classList.add('print-header');
-    }
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
     
-    const summaryCards = document.querySelectorAll('.summary-card');
-    summaryCards.forEach(card => {
-        card.classList.add('print-summary');
-    });
+    // Get the current report data
+    const reportData = @json($risks ?? []);
+    const totalRisks = reportData.length;
+    const highRiskCount = reportData.filter(risk => risk.risk_rating === 'High').length;
+    const mediumRiskCount = reportData.filter(risk => risk.risk_rating === 'Medium').length;
+    const lowRiskCount = reportData.filter(risk => risk.risk_rating === 'Low').length;
     
-    const dataTable = document.querySelector('.table');
-    if (dataTable) {
-        dataTable.classList.add('print-table');
-    }
-    
-    // Add print-specific classes to risk rating badges
-    const riskBadges = document.querySelectorAll('.badge');
-    riskBadges.forEach(badge => {
-        if (badge.textContent.includes('High') || badge.textContent.includes('Medium') || badge.textContent.includes('Low')) {
-            badge.classList.add('print-risk-rating');
-            if (badge.textContent.includes('High')) {
-                badge.classList.add('print-rating-high');
-            } else if (badge.textContent.includes('Medium')) {
-                badge.classList.add('print-rating-medium');
-            } else if (badge.textContent.includes('Low')) {
-                badge.classList.add('print-rating-low');
+    // Build the print content
+    let printContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Risk Assessments Report - Print</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 12px;
+                line-height: 1.4;
+                margin: 0;
+                padding: 20px;
+                color: #333;
             }
-        }
-    });
-    
-    // Add print-specific classes to risk rows
-    const riskRows = document.querySelectorAll('tbody tr');
-    riskRows.forEach(row => {
-        const ratingCell = row.querySelector('.badge');
-        if (ratingCell) {
-            if (ratingCell.textContent.includes('High')) {
-                row.classList.add('print-risk-high');
-            } else if (ratingCell.textContent.includes('Medium')) {
-                row.classList.add('print-risk-medium');
-            } else if (ratingCell.textContent.includes('Low')) {
-                row.classList.add('print-risk-low');
+            
+            .print-header {
+                text-align: center;
+                margin-bottom: 30px;
+                border-bottom: 2px solid #333;
+                padding-bottom: 20px;
             }
-        }
+            
+            .print-header h1 {
+                color: #333;
+                margin: 0;
+                font-size: 24px;
+            }
+            
+            .print-header .subtitle {
+                color: #666;
+                margin: 5px 0 0 0;
+                font-size: 14px;
+            }
+            
+            .print-summary {
+                background: #f8f9fa;
+                padding: 15px;
+                margin-bottom: 20px;
+                border: 1px solid #ddd;
+            }
+            
+            .print-summary h3 {
+                margin: 0 0 10px 0;
+                color: #333;
+                font-size: 16px;
+            }
+            
+            .print-summary-stats {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 10px;
+            }
+            
+            .print-stat-item {
+                text-align: center;
+            }
+            
+            .print-stat-number {
+                font-size: 18px;
+                font-weight: bold;
+                color: #333;
+            }
+            
+            .print-stat-label {
+                font-size: 11px;
+                color: #666;
+                text-transform: uppercase;
+            }
+            
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+                font-size: 10px;
+            }
+            
+            .print-table th, .print-table td {
+                border: 1px solid #333;
+                padding: 6px;
+                text-align: left;
+                vertical-align: top;
+            }
+            
+            .print-table th {
+                background-color: #333;
+                color: white;
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 9px;
+            }
+            
+            .print-table tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            
+            .print-risk-high { background-color: #ffebee; }
+            .print-risk-medium { background-color: #fff3e0; }
+            .print-risk-low { background-color: #e8f5e8; }
+            
+            .print-footer {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #333;
+                text-align: center;
+                font-size: 10px;
+                color: #666;
+            }
+            
+            .print-risk-rating {
+                padding: 2px 4px;
+                border-radius: 2px;
+                font-weight: bold;
+                font-size: 8px;
+                text-transform: uppercase;
+            }
+            
+            .print-rating-high { background-color: #e74c3c; color: white; }
+            .print-rating-medium { background-color: #f39c12; color: white; }
+            .print-rating-low { background-color: #27ae60; color: white; }
+            .print-rating-critical { background-color: #8e44ad; color: white; }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="print-header">
+            <h1>Risk Assessments Report</h1>
+            <div class="subtitle">Generated on ${new Date().toLocaleString()} by {{ auth()->user()->name ?? 'System' }}</div>
+        </div>
+        
+        <div class="print-summary">
+            <h3>Report Summary</h3>
+            <div class="print-summary-stats">
+                <div class="print-stat-item">
+                    <div class="print-stat-number">${totalRisks}</div>
+                    <div class="print-stat-label">Total Assessments</div>
+                </div>
+                <div class="print-stat-item">
+                    <div class="print-stat-number" style="color: #e74c3c;">${highRiskCount}</div>
+                    <div class="print-stat-label">High Risk</div>
+                </div>
+                <div class="print-stat-item">
+                    <div class="print-stat-number" style="color: #f39c12;">${mediumRiskCount}</div>
+                    <div class="print-stat-label">Medium Risk</div>
+                </div>
+                <div class="print-stat-item">
+                    <div class="print-stat-number" style="color: #27ae60;">${lowRiskCount}</div>
+                    <div class="print-stat-label">Low Risk</div>
+                </div>
+            </div>
+        </div>
+        
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Client</th>
+                    <th style="width: 12%;">Company</th>
+                    <th style="width: 20%;">Risk Title</th>
+                    <th style="width: 12%;">Category</th>
+                    <th style="width: 8%;">Rating</th>
+                    <th style="width: 6%;">Impact</th>
+                    <th style="width: 8%;">Likelihood</th>
+                    <th style="width: 6%;">Points</th>
+                    <th style="width: 8%;">Status</th>
+                    <th style="width: 5%;">Date</th>
+                </tr>
+            </thead>
+            <tbody>`;
+    
+    // Add each risk row
+    reportData.forEach(risk => {
+        const riskRating = risk.risk_rating || 'N/A';
+        const ratingClass = riskRating.toLowerCase().replace('-', '');
+        const rowClass = riskRating.toLowerCase().replace('-', '');
+        
+        printContent += `
+            <tr class="print-risk-${rowClass}">
+                <td>${risk.client ? risk.client.name : 'N/A'}</td>
+                <td>${risk.client ? (risk.client.company || 'Individual') : 'N/A'}</td>
+                <td>${risk.title || 'Untitled Risk'}</td>
+                <td>${risk.risk_category || 'N/A'}</td>
+                <td>
+                    <span class="print-risk-rating print-rating-${ratingClass}">
+                        ${riskRating}
+                    </span>
+                </td>
+                <td>${risk.impact || 'N/A'}</td>
+                <td>${risk.likelihood || 'N/A'}</td>
+                <td>${risk.overall_risk_points || 'N/A'}</td>
+                <td>${risk.status || 'In Progress'}</td>
+                <td>${risk.created_at ? new Date(risk.created_at).toLocaleDateString() : 'N/A'}</td>
+            </tr>`;
     });
     
-    // Print the page
-    window.print();
+    printContent += `
+            </tbody>
+        </table>
+        
+        <div class="print-footer">
+            <p>This report was generated by the DCS Risk Register System on ${new Date().toLocaleString()}</p>
+            <p>For questions about this report, please contact: ITSupport@dcs.com.na</p>
+        </div>
+    </body>
+    </html>`;
     
-    // Clean up print classes after printing
-    setTimeout(() => {
-        pageHeader?.classList.remove('print-header');
-        summaryCards.forEach(card => card.classList.remove('print-summary'));
-        dataTable?.classList.remove('print-table');
-        riskBadges.forEach(badge => {
-            badge.classList.remove('print-risk-rating', 'print-rating-high', 'print-rating-medium', 'print-rating-low');
-        });
-        riskRows.forEach(row => {
-            row.classList.remove('print-risk-high', 'print-risk-medium', 'print-risk-low');
-        });
-    }, 1000);
+    // Write content to print window and print
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+    // Wait for content to load, then print
+    printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+    };
 }
 
 // Helper function to get risk rating color
