@@ -1132,6 +1132,32 @@ function printReport() {
     const mediumRiskCount = reportData.filter(risk => risk.risk_rating === 'Medium').length;
     const lowRiskCount = reportData.filter(risk => risk.risk_rating === 'Low').length;
     
+    // Helper function to get category breakdown
+    function getCategoryBreakdown(data) {
+        const categories = {};
+        data.forEach(risk => {
+            const category = risk.risk_category || 'Uncategorized';
+            categories[category] = (categories[category] || 0) + 1;
+        });
+        
+        return Object.entries(categories)
+            .map(([category, count]) => `<span style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; margin-right: 5px;">${category}: ${count}</span>`)
+            .join('');
+    }
+    
+    // Helper function to get status breakdown
+    function getStatusBreakdown(data) {
+        const statuses = {};
+        data.forEach(risk => {
+            const status = risk.status || 'Unknown';
+            statuses[status] = (statuses[status] || 0) + 1;
+        });
+        
+        return Object.entries(statuses)
+            .map(([status, count]) => `<span style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; margin-right: 5px;">${status}: ${count}</span>`)
+            .join('');
+    }
+    
     // Build the print content
     let printContent = `
     <!DOCTYPE html>
@@ -1261,8 +1287,11 @@ function printReport() {
     </head>
     <body>
         <div class="print-header">
-            <h1>Risk Assessments Report</h1>
+            <h1>DCS Risk Assessments Report</h1>
             <div class="subtitle">Generated on ${new Date().toLocaleString()} by {{ auth()->user()->name ?? 'System' }}</div>
+            <div class="subtitle" style="margin-top: 5px; font-size: 12px;">
+                DCS Risk Register System | No 41, Johann and Sturrock, Windhoek, Namibia
+            </div>
         </div>
         
         <div class="print-summary">
@@ -1271,11 +1300,11 @@ function printReport() {
                 <div class="print-stat-item">
                     <div class="print-stat-number">${totalRisks}</div>
                     <div class="print-stat-label">Total Assessments</div>
-                </div>
+                    </div>
                 <div class="print-stat-item">
                     <div class="print-stat-number" style="color: #e74c3c;">${highRiskCount}</div>
                     <div class="print-stat-label">High Risk</div>
-                </div>
+                    </div>
                 <div class="print-stat-item">
                     <div class="print-stat-number" style="color: #f39c12;">${mediumRiskCount}</div>
                     <div class="print-stat-label">Medium Risk</div>
@@ -1285,23 +1314,40 @@ function printReport() {
                     <div class="print-stat-label">Low Risk</div>
                 </div>
             </div>
+            
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #333;">Risk Distribution by Category</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px;">
+                    ${getCategoryBreakdown(reportData)}
+            </div>
+        </div>
+            
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #333;">Status Overview</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px;">
+                    ${getStatusBreakdown(reportData)}
+                </div>
+            </div>
         </div>
         
         <table class="print-table">
-            <thead>
-                <tr>
-                    <th style="width: 15%;">Client</th>
-                    <th style="width: 12%;">Company</th>
-                    <th style="width: 20%;">Risk Title</th>
-                    <th style="width: 12%;">Category</th>
-                    <th style="width: 8%;">Rating</th>
-                    <th style="width: 6%;">Impact</th>
-                    <th style="width: 8%;">Likelihood</th>
-                    <th style="width: 6%;">Points</th>
-                    <th style="width: 8%;">Status</th>
-                    <th style="width: 5%;">Date</th>
-                </tr>
-            </thead>
+                <thead>
+                    <tr>
+                    <th style="width: 8%;">Risk ID</th>
+                    <th style="width: 12%;">Client</th>
+                    <th style="width: 10%;">Company</th>
+                    <th style="width: 15%;">Risk Title</th>
+                    <th style="width: 10%;">Category</th>
+                    <th style="width: 6%;">Rating</th>
+                    <th style="width: 5%;">Impact</th>
+                    <th style="width: 6%;">Likelihood</th>
+                    <th style="width: 5%;">Points</th>
+                    <th style="width: 6%;">Status</th>
+                    <th style="width: 8%;">Owner</th>
+                    <th style="width: 6%;">Created</th>
+                    <th style="width: 6%;">Due Date</th>
+                    </tr>
+                </thead>
             <tbody>`;
     
     // Add each risk row
@@ -1310,8 +1356,16 @@ function printReport() {
         const ratingClass = riskRating.toLowerCase().replace('-', '');
         const rowClass = riskRating.toLowerCase().replace('-', '');
         
+        // Format dates
+        const createdDate = risk.created_at ? new Date(risk.created_at).toLocaleDateString() : 'N/A';
+        const dueDate = risk.due_date ? new Date(risk.due_date).toLocaleDateString() : 'N/A';
+        
+        // Get owner name
+        const ownerName = risk.assigned_user ? risk.assigned_user.name : (risk.assignedUser ? risk.assignedUser.name : 'Unassigned');
+        
         printContent += `
             <tr class="print-risk-${rowClass}">
+                <td>#${risk.id || 'N/A'}</td>
                 <td>${risk.client ? risk.client.name : 'N/A'}</td>
                 <td>${risk.client ? (risk.client.company || 'Individual') : 'N/A'}</td>
                 <td>${risk.title || 'Untitled Risk'}</td>
@@ -1325,7 +1379,9 @@ function printReport() {
                 <td>${risk.likelihood || 'N/A'}</td>
                 <td>${risk.overall_risk_points || 'N/A'}</td>
                 <td>${risk.status || 'In Progress'}</td>
-                <td>${risk.created_at ? new Date(risk.created_at).toLocaleDateString() : 'N/A'}</td>
+                <td>${ownerName}</td>
+                <td>${createdDate}</td>
+                <td>${dueDate}</td>
             </tr>`;
     });
     
@@ -1334,8 +1390,20 @@ function printReport() {
         </table>
         
         <div class="print-footer">
-            <p>This report was generated by the DCS Risk Register System on ${new Date().toLocaleString()}</p>
-            <p>For questions about this report, please contact: ITSupport@dcs.com.na</p>
+            <p><strong>DCS Risk Register System - Professional Risk Management Platform</strong></p>
+            <p>This report was generated on ${new Date().toLocaleString()} by {{ auth()->user()->name ?? 'System' }}</p>
+            <p>Report includes ${totalRisks} risk assessment(s) with comprehensive analysis and compliance data</p>
+            <p style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ccc;">
+                <strong>Contact Information:</strong><br>
+                Email: ITSupport@dcs.com.na | info@dcs.com.na<br>
+                Phone: +264 82 403 2391<br>
+                Address: No 41, Johann and Sturrock, Windhoek, Namibia<br>
+                Website: www.dcs.com.na
+            </p>
+            <p style="margin-top: 10px; font-size: 9px; color: #999;">
+                This report is confidential and intended for internal use only. 
+                Distribution outside of DCS requires prior authorization.
+            </p>
         </div>
     </body>
     </html>`;
