@@ -26,8 +26,8 @@
                     <li><a href="mailto:info@dcs.com.na" class="footer-link">
                         <i class="fas fa-envelope me-2"></i>info@dcs.com.na
                     </a></li>
-                    <li><a href="tel:+26461302391" class="footer-link">
-                        <i class="fas fa-phone me-2"></i>061-302 391
+                    <li><a href="tel:+264824032391" class="footer-link">
+                        <i class="fas fa-phone me-2"></i>+264 82 403 2391
                     </a></li>
                 </ul>
             </div>
