@@ -59,7 +59,7 @@ class RisksExport implements FromCollection, WithHeadings, WithMapping, WithStyl
             $risk->impact ?? 'N/A',
             $risk->likelihood ?? 'N/A',
             $risk->risk_rating ?? 'N/A',
-            $risk->overall_risk_points ?? 'N/A',
+            $risk->overall_risk_points ?? $risk->total_points ?? 'N/A',
             $risk->status ?? 'In Progress',
             $risk->approval_status ?? 'Pending',
             $risk->created_at ? $risk->created_at->format('Y-m-d') : 'N/A',

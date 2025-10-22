@@ -1382,7 +1382,7 @@ function printReport() {
                 </td>
                 <td>${risk.impact || 'N/A'}</td>
                 <td>${risk.likelihood || 'N/A'}</td>
-                <td>${risk.overall_risk_points || 'N/A'}</td>
+                <td>${risk.overall_risk_points || risk.total_points || 'N/A'}</td>
                 <td>${risk.status || 'In Progress'}</td>
                 <td>${ownerName}</td>
                 <td>${createdDate}</td>

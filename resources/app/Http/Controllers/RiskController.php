@@ -1313,7 +1313,7 @@ class RiskController extends Controller
                         $risk->created_at->format('Y-m-d'),
                         $risk->due_date ? $risk->due_date->format('Y-m-d') : 'N/A',
                         $risk->risk_category ?? 'N/A',
-                        $risk->overall_risk_points ?? 'N/A',
+                        $risk->overall_risk_points ?? $risk->total_points ?? 'N/A',
                         $risk->client_acceptance ?? 'N/A',
                         $risk->ongoing_monitoring ?? 'N/A',
                         $risk->dcs_comments ?? 'N/A'

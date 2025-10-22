@@ -193,7 +193,7 @@
                 </td>
                 <td>{{ $risk->impact ?? 'N/A' }}</td>
                 <td>{{ $risk->likelihood ?? 'N/A' }}</td>
-                <td>{{ $risk->overall_risk_points ?? 'N/A' }}</td>
+                <td>{{ $risk->overall_risk_points ?? $risk->total_points ?? 'N/A' }}</td>
                 <td>{{ $risk->status ?? 'In Progress' }}</td>
                 <td>{{ $risk->assignedUser ? $risk->assignedUser->name : 'Unassigned' }}</td>
                 <td>{{ $risk->created_at ? $risk->created_at->format('Y-m-d') : 'N/A' }}</td>
