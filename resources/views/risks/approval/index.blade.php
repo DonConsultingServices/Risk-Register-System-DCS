@@ -587,9 +587,9 @@ body.modal-open {
                                     <input type="checkbox" class="form-check-input" id="select-all">
                                 </th>
                                 @endif
-                                <th>Risk ID</th>
-                                <th>Risk Details</th>
-                                <th>Client</th>
+                                <th>Client ID</th>
+                                <th>Client Details</th>
+                                <th>Client Name</th>
                                 <th>Created By</th>
                                 <th>Risk Level</th>
                                 <th>Created</th>
@@ -597,52 +597,48 @@ body.modal-open {
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($risks as $risk)
+                            @foreach($risks as $client)
                             <tr>
                                 @if($status === 'pending')
                                 <td>
-                                    <input type="checkbox" class="form-check-input risk-checkbox" value="{{ $risk->id }}">
+                                    <input type="checkbox" class="form-check-input risk-checkbox" value="{{ $client->id }}">
                                 </td>
                                 @endif
                                 <td>
-                                    <span class="risk-id">#{{ $risk->id }}</span>
+                                    <span class="risk-id">#{{ $client->id }}</span>
                                 </td>
                                 <td>
-                                    <div class="risk-title">{{ $risk->title }}</div>
-                                    <div class="risk-description">{{ Str::limit($risk->description, 60) }}</div>
+                                    <div class="risk-title">{{ $client->name }}</div>
+                                    <div class="risk-description">{{ $client->company ?? 'Individual Client' }}</div>
                                 </td>
                                 <td>
-                                    @if($risk->client)
-                                        <a href="{{ route('clients.show', $risk->client) }}" class="client-link">{{ $risk->client->name }}</a>
-                                    @else
-                                        <span class="text-muted">{{ $risk->client_name }}</span>
-                                    @endif
+                                    <a href="{{ route('clients.show', $client) }}" class="client-link">{{ $client->name }}</a>
                                 </td>
                                 <td>
-                                    @if($risk->creator)
-                                        <span class="fw-medium">{{ $risk->creator->name }}</span>
-                                        <br><small class="text-muted">{{ $risk->creator->role_display_name }}</small>
+                                    @if($client->creator)
+                                        <span class="fw-medium">{{ $client->creator->name }}</span>
+                                        <br><small class="text-muted">{{ $client->creator->role_display_name }}</small>
                                     @else
                                         <span class="text-muted">Unknown</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge bg-{{ $risk->risk_rating_color }}">{{ $risk->risk_rating }}</span>
+                                    <span class="badge bg-{{ $client->overall_risk_rating === 'High-risk' ? 'danger' : ($client->overall_risk_rating === 'Medium-risk' ? 'warning' : 'success') }}">{{ $client->overall_risk_rating ?? 'Low-risk' }}</span>
                                 </td>
                                 <td>
-                                    <span class="text-muted">{{ $risk->created_at->format('M d, Y') }}</span>
-                                    <br><small class="text-muted">{{ $risk->created_at->diffForHumans() }}</small>
+                                    <span class="text-muted">{{ $client->created_at->format('M d, Y') }}</span>
+                                    <br><small class="text-muted">{{ $client->created_at->diffForHumans() }}</small>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
-                                        <a href="{{ route('risks.approval.show', $risk) }}" class="btn btn-sm btn-outline-primary" title="View Details">
+                                        <a href="{{ route('clients.show', $client) }}" class="btn btn-sm btn-outline-primary" title="View Client Details">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         @if($status === 'pending')
-                                        <button class="btn btn-sm btn-success" onclick="approveRisk({{ $risk->id }})" title="Approve">
+                                        <button class="btn btn-sm btn-success" onclick="approveClient({{ $client->id }})" title="Approve">
                                             <i class="fas fa-check"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-danger" onclick="rejectRisk({{ $risk->id }})" title="Reject">
+                                        <button class="btn btn-sm btn-danger" onclick="rejectClient({{ $client->id }})" title="Reject">
                                             <i class="fas fa-times"></i>
                                         </button>
                                         @elseif($status === 'approved')
@@ -784,12 +780,12 @@ function cleanupModal() {
     document.body.style.paddingRight = '';
 }
 
-function approveRisk(riskId) {
+function approveClient(clientId) {
     // Clean up any existing modal first
     cleanupModal();
     
     // Set the form action
-    document.getElementById('approvalForm').action = `/risks/approval/${riskId}/approve`;
+    document.getElementById('approvalForm').action = `/risks/approval/${clientId}/approve`;
     
     // Clear any previous form data
     document.getElementById('approval_notes').value = '';
@@ -860,12 +856,12 @@ function approveRisk(riskId) {
     currentModal.show();
 }
 
-function rejectRisk(riskId) {
+function rejectClient(clientId) {
     // Clean up any existing modal first
     cleanupModal();
     
     // Set the form action
-    document.getElementById('rejectionForm').action = `/risks/approval/${riskId}/reject`;
+    document.getElementById('rejectionForm').action = `/risks/approval/${clientId}/reject`;
     
     // Clear any previous form data
     document.getElementById('rejection_reason').value = '';

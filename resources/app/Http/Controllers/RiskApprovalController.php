@@ -28,16 +28,15 @@ class RiskApprovalController extends Controller
                 $status = 'pending';
             }
             
-            // Use Eloquent models with relationships instead of raw SQL
-            // Added distinct() to prevent duplicate records
-            $risks = Risk::with(['client', 'creator', 'assignedUser', 'category'])
-                ->where('approval_status', $status)
-                ->distinct()
+            // Get clients based on assessment status instead of individual risks
+            $clients = \App\Models\Client::with(['creator', 'risks'])
+                ->where('assessment_status', $status)
+                ->whereNull('deleted_at')
                 ->orderBy('created_at', 'desc')
                 ->get();
             
-            // Remove any duplicates based on ID (extra safety)
-            $risks = $risks->unique('id');
+            // For backward compatibility, use clients as risks
+            $risks = $clients;
             
             // Get counts based on client assessment status (not risk approval status)
             $stats = (object)[
@@ -87,76 +86,74 @@ class RiskApprovalController extends Controller
     /**
      * Approve a risk
      */
-    public function approve(Request $request, Risk $risk)
+    public function approve(Request $request, $clientId)
     {
-        // Check if already approved
-        if ($risk->approval_status === 'approved') {
-            return redirect()->route('risks.approval.index', ['status' => 'approved'])
-                ->with('info', 'This risk has already been approved.');
-        }
+        $client = \App\Models\Client::findOrFail($clientId);
         
-        if (!$risk->canBeApproved()) {
-            return redirect()->route('risks.approval.index')
-                ->with('error', 'This risk cannot be approved.');
+        // Check if already approved
+        if ($client->assessment_status === 'approved') {
+            return redirect()->route('risks.approval.index', ['status' => 'approved'])
+                ->with('info', 'This client has already been approved.');
         }
 
         $request->validate([
             'approval_notes' => 'nullable|string|max:1000'
         ]);
 
-        $risk->update([
-            'approval_status' => 'approved',
+        $client->update([
+            'assessment_status' => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
-            'approval_notes' => $request->approval_notes
+            'approval_notes' => $request->approval_notes,
+            'status' => 'Active'
         ]);
 
-        Log::info('Risk approved', [
-            'risk_id' => $risk->id,
+        Log::info('Client assessment approved', [
+            'client_id' => $client->id,
+            'client_name' => $client->name,
             'approved_by' => auth()->id(),
             'approver_name' => auth()->user()->name
         ]);
 
         return redirect()->route('risks.approval.index', ['status' => 'approved'])
-            ->with('success', 'Risk has been approved successfully.');
+            ->with('success', 'Client assessment has been approved successfully.');
     }
 
     /**
      * Reject a risk
      */
-    public function reject(Request $request, Risk $risk)
+    public function reject(Request $request, $clientId)
     {
-        // Check if already rejected
-        if ($risk->approval_status === 'rejected') {
-            return redirect()->route('risks.approval.index', ['status' => 'rejected'])
-                ->with('info', 'This risk has already been rejected.');
-        }
+        $client = \App\Models\Client::findOrFail($clientId);
         
-        if (!$risk->canBeRejected()) {
-            return redirect()->route('risks.approval.index')
-                ->with('error', 'This risk cannot be rejected.');
+        // Check if already rejected
+        if ($client->assessment_status === 'rejected') {
+            return redirect()->route('risks.approval.index', ['status' => 'rejected'])
+                ->with('info', 'This client has already been rejected.');
         }
 
         $request->validate([
             'rejection_reason' => 'required|string|max:1000'
         ]);
 
-        $risk->update([
-            'approval_status' => 'rejected',
+        $client->update([
+            'assessment_status' => 'rejected',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
-            'rejection_reason' => $request->rejection_reason
+            'rejection_reason' => $request->rejection_reason,
+            'status' => 'Inactive'
         ]);
 
-        Log::info('Risk rejected', [
-            'risk_id' => $risk->id,
+        Log::info('Client assessment rejected', [
+            'client_id' => $client->id,
+            'client_name' => $client->name,
             'rejected_by' => auth()->id(),
             'rejector_name' => auth()->user()->name,
             'rejection_reason' => $request->rejection_reason
         ]);
 
         return redirect()->route('risks.approval.index', ['status' => 'rejected'])
-            ->with('success', 'Risk has been rejected.');
+            ->with('success', 'Client assessment has been rejected.');
     }
 
     /**
