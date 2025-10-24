@@ -837,6 +837,8 @@
                             <option value="">Quick Filters</option>
                             <option value="high_risk" <?php echo e(request('filter') == 'high_risk' ? 'selected' : ''); ?>>High Risk Clients</option>
                             <option value="overdue" <?php echo e(request('filter') == 'overdue' ? 'selected' : ''); ?>>Overdue Assessments</option>
+                            <option value="open" <?php echo e(request('filter') == 'open' ? 'selected' : ''); ?>>Open Assessments</option>
+                            <option value="closed" <?php echo e(request('filter') == 'closed' ? 'selected' : ''); ?>>Closed Assessments</option>
                             <option value="pending" <?php echo e(request('filter') == 'pending' ? 'selected' : ''); ?>>Pending Approvals</option>
                             <option value="approved" <?php echo e(request('filter') == 'approved' ? 'selected' : ''); ?>>Approved Clients</option>
                             <option value="rejected" <?php echo e(request('filter') == 'rejected' ? 'selected' : ''); ?>>Rejected Clients</option>
@@ -892,7 +894,7 @@
                     <?php endswitch; ?>
                 <?php else: ?>
                     Client Risk Assessments Summary
-                    <small class="text-muted ms-2">(Showing risks for approved clients only)</small>
+                    <small class="text-white ms-2">(Showing risks for approved clients only)</small>
                 <?php endif; ?>
             </h5>
             <?php if(request('filter') || request('risk_level') || request('status') || request('approval_status')): ?>
@@ -949,8 +951,17 @@
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <span class="badge bg-<?php echo e($risk->risk_rating_color ?? 'secondary'); ?> fs-6">
-                                        <?php echo e($risk->risk_level ?? $risk->overall_risk_rating ?? 'Not Assessed'); ?>
+                                    <?php
+                                        $riskLevel = $risk->risk_rating ?? 'Not Assessed';
+                                        $riskColor = match($riskLevel) {
+                                            'High-risk', 'Very High-risk', 'Critical' => 'danger',
+                                            'Medium-risk' => 'warning', 
+                                            'Low-risk' => 'success',
+                                            default => 'secondary'
+                                        };
+                                    ?>
+                                    <span class="badge bg-<?php echo e($riskColor); ?> fs-6">
+                                        <?php echo e($riskLevel); ?>
 
                                     </span>
                                 </td>
@@ -961,8 +972,16 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-<?php echo e($risk->approval_status_color ?? 'warning'); ?> fs-6">
-                                        <?php echo e(ucfirst($risk->approval_status ?? 'Pending')); ?>
+                                    <?php
+                                        $statusColor = match($risk->assessment_status) {
+                                            'approved' => 'success',
+                                            'rejected' => 'danger',
+                                            'pending' => 'warning',
+                                            default => 'warning'
+                                        };
+                                    ?>
+                                    <span class="badge bg-<?php echo e($statusColor); ?> fs-6">
+                                        <?php echo e(ucfirst($risk->assessment_status ?? 'Pending')); ?>
 
                                     </span>
                                     <?php if($risk->approver_name): ?>
@@ -977,17 +996,24 @@
                                 </td>
                                 <td>
                                     <?php if($risk->due_date): ?>
-                                        <span class="due-date <?php echo e($risk->isOverdue() ? 'overdue' : ''); ?>">
-                                            <?php echo e($risk->due_date->format('M d, Y')); ?>
+                                        <?php
+                                            $dueDate = \Carbon\Carbon::parse($risk->due_date);
+                                            $isOverdue = $dueDate->isPast();
+                                        ?>
+                                        <span class="due-date <?php echo e($isOverdue ? 'overdue' : ''); ?>">
+                                            <?php echo e($dueDate->format('M d, Y')); ?>
 
                                         </span>
+                                        <?php if($isOverdue): ?>
+                                            <span class="badge bg-danger ms-1">Overdue</span>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span class="text-muted">No review date</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a href="<?php echo e(route('risks.show', $risk)); ?>" class="btn btn-sm btn-outline-primary" title="View Details">
+                                        <a href="<?php echo e(route('clients.show', $risk->client_id)); ?>" class="btn btn-sm btn-outline-primary" title="View Client Details">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <?php if($risk->client): ?>
@@ -995,7 +1021,7 @@
                                                 <i class="fas fa-user"></i>
                                             </a>
                                         <?php endif; ?>
-                                        <?php if($risk->approval_status === 'pending'): ?>
+                                        <?php if($risk->assessment_status === 'pending'): ?>
                                             <a href="<?php echo e(route('risks.approval.show', $risk)); ?>" class="btn btn-sm btn-warning" title="Approve/Reject">
                                                 <i class="fas fa-check-circle"></i>
                                             </a>
@@ -1133,15 +1159,25 @@ function printReport() {
     // Get the current report data
     const reportData = <?php echo json_encode($risks ?? [], 15, 512) ?>;
     const totalRisks = reportData.length;
-    const highRiskCount = reportData.filter(risk => risk.risk_rating === 'High').length;
-    const mediumRiskCount = reportData.filter(risk => risk.risk_rating === 'Medium').length;
-    const lowRiskCount = reportData.filter(risk => risk.risk_rating === 'Low').length;
+    
+    // Count risk levels based on client overall risk rating
+    const highRiskCount = reportData.filter(client => 
+        client.risk_rating === 'High-risk' || 
+        client.risk_rating === 'Very High-risk' ||
+        client.risk_rating === 'Critical'
+    ).length;
+    const mediumRiskCount = reportData.filter(client => 
+        client.risk_rating === 'Medium-risk'
+    ).length;
+    const lowRiskCount = reportData.filter(client => 
+        client.risk_rating === 'Low-risk'
+    ).length;
     
     // Helper function to get category breakdown
     function getCategoryBreakdown(data) {
         const categories = {};
-        data.forEach(risk => {
-            const category = risk.risk_category || 'Uncategorized';
+        data.forEach(client => {
+            const category = client.risk_category || 'Comprehensive';
             categories[category] = (categories[category] || 0) + 1;
         });
         
@@ -1153,8 +1189,8 @@ function printReport() {
     // Helper function to get status breakdown
     function getStatusBreakdown(data) {
         const statuses = {};
-        data.forEach(risk => {
-            const status = risk.status || 'Unknown';
+        data.forEach(client => {
+            const status = client.status || 'Unknown';
             statuses[status] = (statuses[status] || 0) + 1;
         });
         
@@ -1355,35 +1391,35 @@ function printReport() {
                 </thead>
             <tbody>`;
     
-    // Add each risk row
-    reportData.forEach(risk => {
-        const riskRating = risk.risk_rating || 'N/A';
+    // Add each client row
+    reportData.forEach(client => {
+        const riskRating = client.risk_rating || 'N/A';
         const ratingClass = riskRating.toLowerCase().replace('-', '');
         const rowClass = riskRating.toLowerCase().replace('-', '');
         
         // Format dates
-        const createdDate = risk.created_at ? new Date(risk.created_at).toLocaleDateString() : 'N/A';
-        const dueDate = risk.due_date ? new Date(risk.due_date).toLocaleDateString() : 'N/A';
+        const createdDate = client.created_at ? new Date(client.created_at).toLocaleDateString() : 'N/A';
+        const dueDate = 'N/A'; // Clients don't have due dates
         
         // Get owner name
-        const ownerName = risk.assigned_user ? risk.assigned_user.name : (risk.assignedUser ? risk.assignedUser.name : 'Unassigned');
+        const ownerName = client.assigned_user_name || 'Unassigned';
         
         printContent += `
             <tr class="print-risk-${rowClass}">
-                <td>#${risk.id || 'N/A'}</td>
-                <td>${risk.client ? risk.client.name : 'N/A'}</td>
-                <td>${risk.client ? (risk.client.company || 'Individual') : 'N/A'}</td>
-                <td>${risk.title || 'Untitled Risk'}</td>
-                <td>${risk.risk_category || 'N/A'}</td>
+                <td>#${client.id || 'N/A'}</td>
+                <td>${client.client_name || 'N/A'}</td>
+                <td>${client.company || 'Individual'}</td>
+                <td>${client.title || 'Untitled Client'}</td>
+                <td>${client.risk_category || 'Comprehensive'}</td>
                 <td>
                     <span class="print-risk-rating print-rating-${ratingClass}">
                         ${riskRating}
                     </span>
                 </td>
-                <td>${risk.impact || 'N/A'}</td>
-                <td>${risk.likelihood || 'N/A'}</td>
-                <td>${risk.overall_risk_points || risk.total_points || 'N/A'}</td>
-                <td>${risk.status || 'In Progress'}</td>
+                <td>N/A</td>
+                <td>N/A</td>
+                <td>${client.overall_risk_points || 'N/A'}</td>
+                <td>${client.status || 'Active'}</td>
                 <td>${ownerName}</td>
                 <td>${createdDate}</td>
                 <td>${dueDate}</td>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Risk;
+use App\Models\Client;
 use App\Models\RiskCategory;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -641,10 +642,10 @@ class RiskController extends Controller
             
             // Risk level counts based on clients' current overall rating
             $riskCounts = [
-                'high' => (int) DB::table('clients')->whereIn('overall_risk_rating', ['High','Critical'])->whereNull('deleted_at')->count(),
-                'critical' => (int) DB::table('clients')->where('overall_risk_rating', 'Critical')->whereNull('deleted_at')->count(),
-                'medium' => (int) DB::table('clients')->where('overall_risk_rating', 'Medium')->whereNull('deleted_at')->count(),
-                'low' => (int) DB::table('clients')->where('overall_risk_rating', 'Low')->whereNull('deleted_at')->count(),
+                'high' => (int) DB::table('clients')->where('overall_risk_rating', 'LIKE', '%High%')->where('assessment_status', 'approved')->whereNull('deleted_at')->count(),
+                'critical' => (int) DB::table('clients')->where('overall_risk_rating', 'Critical')->where('assessment_status', 'approved')->whereNull('deleted_at')->count(),
+                'medium' => (int) DB::table('clients')->where('overall_risk_rating', 'LIKE', '%Medium%')->where('assessment_status', 'approved')->whereNull('deleted_at')->count(),
+                'low' => (int) DB::table('clients')->where('overall_risk_rating', 'LIKE', '%Low%')->where('assessment_status', 'approved')->whereNull('deleted_at')->count(),
             ];
             
             // Risks by category can still read from risks for distribution visuals
@@ -726,30 +727,36 @@ class RiskController extends Controller
     }
     
     /**
-     * Build optimized risks query
+     * Build optimized risks query - now based on clients
      */
     private function buildOptimizedRisksQuery(Request $request)
     {
-        $query = Risk::select([
-                'risks.id', 'risks.title', 'risks.client_name', 'risks.risk_category',
-                'risks.impact', 'risks.likelihood', 'risks.risk_rating', 'risks.status',
-                'risks.approval_status', 'risks.due_date', 'risks.created_at',
-                'risks.client_id', 'risks.overall_risk_rating', 'risks.overall_risk_points',
-                'clients.name as client_name_from_relation', 'clients.company',
+        $query = Client::select([
+                'clients.id', 'clients.name as title', 'clients.company as description', 
+                'clients.name as client_name', 'clients.id as client_id',
+                'clients.overall_risk_rating as risk_rating', 'clients.status', 'clients.created_at',
                 'clients.assessment_status', 'clients.rejection_reason',
                 'clients.approved_at', 'clients.approved_by',
+                'clients.name as client_name_from_relation', 'clients.company',
+                'clients.risk_category', 'clients.overall_risk_points',
                 'users.name as assigned_user_name',
-                'approvers.name as approver_name'
+                'approvers.name as approver_name',
+                DB::raw('CASE 
+                    WHEN clients.overall_risk_rating LIKE "%Very High%" OR clients.overall_risk_rating LIKE "%Critical%" THEN NULL
+                    WHEN clients.overall_risk_rating LIKE "%High%" THEN DATE_ADD(clients.approved_at, INTERVAL 3 MONTH)
+                    WHEN clients.overall_risk_rating LIKE "%Medium%" THEN DATE_ADD(clients.approved_at, INTERVAL 6 MONTH)
+                    WHEN clients.overall_risk_rating LIKE "%Low%" THEN DATE_ADD(clients.approved_at, INTERVAL 12 MONTH)
+                    ELSE NULL
+                END as due_date')
             ])
-            ->leftJoin('clients', 'risks.client_id', '=', 'clients.id')
-            ->leftJoin('users', 'risks.assigned_user_id', '=', 'users.id')
+            ->leftJoin('users', 'clients.created_by', '=', 'users.id')
             ->leftJoin('users as approvers', 'clients.approved_by', '=', 'approvers.id')
-            ->whereNull('risks.deleted_at');
+            ->whereNull('clients.deleted_at');
         
         // Apply filtering based on request
         $this->applyRisksFilters($query, $request);
         
-        return $query->orderBy('risks.created_at', 'desc');
+        return $query->orderBy('clients.created_at', 'desc');
     }
     
     /**
@@ -759,56 +766,54 @@ class RiskController extends Controller
     {
         $filter = $request->get('filter');
         
-        if ($filter === 'rejected') {
-            $query->where('clients.assessment_status', 'rejected');
-        } else {
-            // Default: show approved clients or standalone risks
-            $query->where(function($q) {
-                $q->where('clients.assessment_status', 'approved')
-                  ->orWhere(function($subQ) {
-                      $subQ->whereNull('risks.client_id')
-                           ->whereNull('risks.client_name');
-                  });
-            });
+        // Apply quick filters first
+        switch ($filter) {
+            case 'rejected':
+                $query->where('clients.assessment_status', 'rejected');
+                break;
+            case 'approved':
+                $query->where('clients.assessment_status', 'approved');
+                break;
+            case 'pending':
+                $query->where('clients.assessment_status', 'pending');
+                break;
+            case 'high_risk':
+                $query->where('clients.assessment_status', 'approved')
+                      ->where(function($q) {
+                          $q->where('clients.overall_risk_rating', 'High-risk')
+                            ->orWhere('clients.overall_risk_rating', 'Very High-risk');
+                      });
+                break;
+            case 'overdue':
+                // For overdue, we need to check if client has overdue risks
+                $query->whereHas('risks', function($riskQuery) {
+                    $riskQuery->where('due_date', '<', now())
+                              ->where('status', '!=', 'Closed');
+                });
+                break;
+            case 'open':
+                $query->where('clients.status', 'Active');
+                break;
+            case 'closed':
+                $query->where('clients.status', 'Inactive');
+                break;
+            default:
+                // Default: show approved clients only
+                $query->where('clients.assessment_status', 'approved');
+                break;
         }
         
         // Apply specific filters
         if ($request->has('risk_level')) {
-            $query->where('risks.overall_risk_rating', $request->get('risk_level'));
+            $query->where('clients.overall_risk_rating', $request->get('risk_level'));
         }
         
         if ($request->has('status')) {
-            $query->where('risks.status', $request->get('status'));
+            $query->where('clients.status', $request->get('status'));
         }
         
         if ($request->has('approval_status')) {
-            $query->where('risks.approval_status', $request->get('approval_status'));
-        }
-        
-        // Apply quick filters
-        switch ($filter) {
-            case 'high_risk':
-                $query->where(function($q) {
-                    $q->where('risks.overall_risk_rating', 'High-risk')
-                      ->orWhere('risks.risk_rating', 'High');
-                });
-                break;
-            case 'overdue':
-                $query->where('risks.due_date', '<', now())
-                      ->where('risks.status', '!=', 'Closed');
-                break;
-            case 'open':
-                $query->where('risks.status', 'Open');
-                break;
-            case 'closed':
-                $query->where('risks.status', 'Closed');
-                break;
-            case 'pending':
-                $query->where('risks.approval_status', 'pending');
-                break;
-            case 'approved':
-                $query->where('risks.approval_status', 'approved');
-                break;
+            $query->where('clients.assessment_status', $request->get('approval_status'));
         }
     }
     
