@@ -37,26 +37,24 @@ class RiskController extends Controller
         }
         
         $data = Cache::remember($cacheKey, 120, function() {
-            // Single optimized query to get all statistics at once - ONLY non-deleted risks
+            // Single optimized query to get all statistics at once - BASED ON CLIENTS, NOT INDIVIDUAL RISKS
             $stats = DB::select("
                 SELECT 
-                    (SELECT COUNT(*) FROM risks WHERE deleted_at IS NULL) as total_risks,
-                    (SELECT COUNT(*) FROM risks WHERE status = 'Open' AND deleted_at IS NULL) as open_risks,
-                    (SELECT COUNT(*) FROM risks WHERE risk_rating = 'High' AND deleted_at IS NULL) as high_risks
+                    (SELECT COUNT(*) FROM clients WHERE deleted_at IS NULL) as total_risks,
+                    (SELECT COUNT(*) FROM clients WHERE status = 'Active' AND deleted_at IS NULL) as open_risks,
+                    (SELECT COUNT(*) FROM clients WHERE overall_risk_rating LIKE '%High%' AND deleted_at IS NULL) as high_risks
             ");
             
-            // Get recent risks with optimized query - ONLY non-deleted risks
+            // Get recent clients with their risk assessments - BASED ON CLIENTS, NOT INDIVIDUAL RISKS
             $risks = DB::select("
                 SELECT 
-                    r.id, r.title, r.description, r.client_name, r.client_id, 
-                    r.risk_category, r.risk_rating, r.status, r.created_at,
+                    c.id, c.name as title, c.company as description, c.name as client_name, c.id as client_id,
+                    'Comprehensive' as risk_category, c.overall_risk_rating as risk_rating, c.status, c.created_at,
                     c.name as client_name_from_relation, c.company,
-                    rc.risk_category as category_name
-                FROM risks r
-                LEFT JOIN clients c ON r.client_id = c.id AND c.deleted_at IS NULL
-                LEFT JOIN risk_categories rc ON r.risk_category = rc.risk_category
-                WHERE r.deleted_at IS NULL
-                ORDER BY r.created_at DESC
+                    'Comprehensive Risk Assessment' as category_name
+                FROM clients c
+                WHERE c.deleted_at IS NULL
+                ORDER BY c.created_at DESC
                 LIMIT 20
             ");
             
