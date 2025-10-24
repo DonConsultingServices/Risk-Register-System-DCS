@@ -457,13 +457,17 @@
                                         <option value="1">Yes</option>
                                     </select>
                                 </div>
-                                <div class="col-md-3 individual-only namibian-only" style="display:none;">
-                                    <label class="form-label">Namibian ID Number</label>
-                                    <input type="text" class="form-control" name="id_number" id="id_number">
+                                <div class="col-md-3 individual-only namibian-only adult-only" style="display:none;">
+                                    <label class="form-label">Namibian ID Number *</label>
+                                    <input type="text" class="form-control" name="id_number" id="id_number" placeholder="Enter Namibian ID">
                                 </div>
                                 <div class="col-md-3 individual-only foreign-only" style="display:none;">
-                                    <label class="form-label">Passport Number</label>
-                                    <input type="text" class="form-control" name="passport_number" id="passport_number">
+                                    <label class="form-label">Passport Number *</label>
+                                    <input type="text" class="form-control" name="passport_number" id="passport_number" placeholder="Enter Passport Number">
+                                </div>
+                                <div class="col-md-3 individual-only namibian-only minor-only" style="display:none;">
+                                    <label class="form-label">Birth Certificate Number *</label>
+                                    <input type="text" class="form-control" name="birth_certificate_number" id="birth_certificate_number" placeholder="Enter Birth Certificate Number">
                                 </div>
                                 <div class="col-md-3 juristic-only" style="display:none;">
                                     <label class="form-label">Registration Number</label>
@@ -491,8 +495,32 @@
                                     <input type="text" class="form-control" name="income_source" id="income_source" placeholder="e.g., Business operations, Investments">
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="client_email" class="form-label">Client Email</label>
+                                    <label for="client_email" class="form-label">Client Email *</label>
                                     <input type="email" class="form-control" name="client_email" id="client_email" placeholder="client@example.com" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="client_phone" class="form-label">Phone Number *</label>
+                                    <input type="tel" class="form-control" name="client_phone" id="client_phone" placeholder="+264 81 123 4567" required>
+                                </div>
+                                <div class="col-md-3 individual-only">
+                                    <label for="date_of_birth" class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control" name="date_of_birth" id="date_of_birth">
+                                </div>
+                                <div class="col-md-3 individual-only">
+                                    <label for="occupation" class="form-label">Occupation</label>
+                                    <input type="text" class="form-control" name="occupation" id="occupation" placeholder="e.g., Engineer, Teacher, Business Owner">
+                                </div>
+                                <div class="col-md-3 individual-only">
+                                    <label for="address" class="form-label">Physical Address</label>
+                                    <textarea class="form-control" name="address" id="address" rows="2" placeholder="Enter full physical address"></textarea>
+                                </div>
+                                <div class="col-md-3 juristic-only">
+                                    <label for="company_name" class="form-label">Company Name *</label>
+                                    <input type="text" class="form-control" name="company_name" id="company_name" placeholder="Enter company name">
+                                </div>
+                                <div class="col-md-3 juristic-only">
+                                    <label for="director_name" class="form-label">Director/CEO Name</label>
+                                    <input type="text" class="form-control" name="director_name" id="director_name" placeholder="Enter director/CEO name">
                                 </div>
                                 <div class="col-md-3">
                                     <label for="client_industry" class="form-label">Industry</label>
@@ -519,30 +547,69 @@
                                     <small class="form-text text-muted">Only current date is allowed for assessments</small>
                                 </div>
                             </div>
-                            <div class="row mt-3">
-                                <div class="col-md-3 individual-only namibian-only" style="display:none;">
-                                    <label class="form-label">Upload ID Document</label>
-                                    <input type="file" class="form-control" name="id_document" id="id_document" accept=".pdf,.jpg,.jpeg,.png">
+                            <!-- Document Upload Section -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-file-upload me-2"></i>Required Documents
+                                    </h6>
                                 </div>
-                                <div class="col-md-3 individual-only minor-only" style="display:none;">
-                                    <label class="form-label">Birth Certificate</label>
+                            </div>
+                            <div class="row">
+                                <!-- Individual Documents -->
+                                <div class="col-md-3 individual-only namibian-only adult-only" style="display:none;">
+                                    <label class="form-label">Namibian ID Document *</label>
+                                    <input type="file" class="form-control" name="id_document" id="id_document" accept=".pdf,.jpg,.jpeg,.png">
+                                    <small class="form-text text-muted">Upload clear copy of Namibian ID</small>
+                                </div>
+                                <div class="col-md-3 individual-only namibian-only minor-only" style="display:none;">
+                                    <label class="form-label">Birth Certificate *</label>
                                     <input type="file" class="form-control" name="birth_certificate" id="birth_certificate" accept=".pdf,.jpg,.jpeg,.png">
+                                    <small class="form-text text-muted">Upload clear copy of birth certificate</small>
                                 </div>
                                 <div class="col-md-3 individual-only foreign-only" style="display:none;">
-                                    <label class="form-label">Passport Document</label>
+                                    <label class="form-label">Passport Document *</label>
                                     <input type="file" class="form-control" name="passport_document" id="passport_document" accept=".pdf,.jpg,.jpeg,.png">
+                                    <small class="form-text text-muted">Upload clear copy of passport</small>
+                                </div>
+                                
+                                <!-- Juristic Documents -->
+                                <div class="col-md-3 juristic-only" style="display:none;">
+                                    <label class="form-label">Registration Document *</label>
+                                    <input type="file" class="form-control" name="registration_document" id="registration_document" accept=".pdf,.jpg,.jpeg,.png">
+                                    <small class="form-text text-muted">Upload company registration certificate</small>
+                                </div>
+                                <div class="col-md-3 juristic-only" style="display:none;">
+                                    <label class="form-label">Memorandum of Association</label>
+                                    <input type="file" class="form-control" name="memorandum" id="memorandum" accept=".pdf,.jpg,.jpeg,.png">
+                                    <small class="form-text text-muted">Upload MoA if available</small>
+                                </div>
+                                
+                                <!-- Common Documents -->
+                                <div class="col-md-3">
+                                    <label class="form-label">Proof of Residence *</label>
+                                    <input type="file" class="form-control" name="proof_of_residence" id="proof_of_residence" accept=".pdf,.jpg,.jpeg,.png" required>
+                                    <small class="form-text text-muted">Utility bill, bank statement, etc.</small>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label" id="por_label">Proof of Residence</label>
-                                    <input type="file" class="form-control" name="proof_of_residence" id="proof_of_residence" accept=".pdf,.jpg,.jpeg,.png">
+                                    <label class="form-label">KYC Form *</label>
+                                    <input type="file" class="form-control" name="kyc_form" id="kyc_form" accept=".pdf,.jpg,.jpeg,.png" required>
+                                    <small class="form-text text-muted">Completed KYC form</small>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">KYC Form</label>
-                                    <input type="file" class="form-control" name="kyc_form" id="kyc_form" accept=".pdf,.jpg,.jpeg,.png">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Source of Earnings</label>
+                                    <label class="form-label">Source of Earnings *</label>
                                     <input type="file" class="form-control" name="source_of_earnings" id="source_of_earnings" accept=".pdf,.jpg,.jpeg,.png" required>
+                                    <small class="form-text text-muted">Bank statements, payslips, etc.</small>
+                                </div>
+                                <div class="col-md-3 individual-only">
+                                    <label class="form-label">Tax Certificate</label>
+                                    <input type="file" class="form-control" name="tax_certificate" id="tax_certificate" accept=".pdf,.jpg,.jpeg,.png">
+                                    <small class="form-text text-muted">ITAS certificate if available</small>
+                                </div>
+                                <div class="col-md-3 juristic-only" style="display:none;">
+                                    <label class="form-label">Tax Clearance Certificate</label>
+                                    <input type="file" class="form-control" name="tax_clearance" id="tax_clearance" accept=".pdf,.jpg,.jpeg,.png">
+                                    <small class="form-text text-muted">Company tax clearance</small>
                                 </div>
                             </div>
                             <div class="row mt-3">
@@ -934,6 +1001,14 @@
                         <input type="hidden" name="sr_owner" id="sr_owner_hidden" value="">
                         <input type="hidden" name="sr_status" id="sr_status_hidden" value="">
                         
+                        <!-- Additional fields for controller compatibility -->
+                        <input type="hidden" name="sr_impact" id="sr_impact" value="">
+                        <input type="hidden" name="sr_likelihood" id="sr_likelihood" value="">
+                        <input type="hidden" name="sr_risk_rating" id="sr_risk_rating" value="">
+                        <input type="hidden" name="sr_mitigation" id="sr_mitigation" value="">
+                        <input type="hidden" name="sr_owner" id="sr_owner" value="">
+                        <input type="hidden" name="sr_status" id="sr_status" value="">
+                        
                         <input type="hidden" name="cr_risk_id" id="cr_risk_id" value="">
                         <input type="hidden" name="cr_risk_name" id="cr_risk_name" value="">
                         <input type="hidden" name="cr_impact" id="cr_impact_hidden" value="">
@@ -943,6 +1018,14 @@
                         <input type="hidden" name="cr_mitigation" id="cr_mitigation_hidden" value="">
                         <input type="hidden" name="cr_owner" id="cr_owner_hidden" value="">
                         <input type="hidden" name="cr_status" id="cr_status_hidden" value="">
+                        
+                        <!-- Additional fields for controller compatibility -->
+                        <input type="hidden" name="cr_impact" id="cr_impact" value="">
+                        <input type="hidden" name="cr_likelihood" id="cr_likelihood" value="">
+                        <input type="hidden" name="cr_risk_rating" id="cr_risk_rating" value="">
+                        <input type="hidden" name="cr_mitigation" id="cr_mitigation" value="">
+                        <input type="hidden" name="cr_owner" id="cr_owner" value="">
+                        <input type="hidden" name="cr_status" id="cr_status" value="">
                         
                         <input type="hidden" name="pr_risk_id" id="pr_risk_id" value="">
                         <input type="hidden" name="pr_risk_name" id="pr_risk_name" value="">
@@ -954,6 +1037,14 @@
                         <input type="hidden" name="pr_owner" id="pr_owner_hidden" value="">
                         <input type="hidden" name="pr_status" id="pr_status_hidden" value="">
                         
+                        <!-- Additional fields for controller compatibility -->
+                        <input type="hidden" name="pr_impact" id="pr_impact" value="">
+                        <input type="hidden" name="pr_likelihood" id="pr_likelihood" value="">
+                        <input type="hidden" name="pr_risk_rating" id="pr_risk_rating" value="">
+                        <input type="hidden" name="pr_mitigation" id="pr_mitigation" value="">
+                        <input type="hidden" name="pr_owner" id="pr_owner" value="">
+                        <input type="hidden" name="pr_status" id="pr_status" value="">
+                        
                         <input type="hidden" name="dr_risk_id" id="dr_risk_id" value="">
                         <input type="hidden" name="dr_risk_name" id="dr_risk_name" value="">
                         <input type="hidden" name="dr_impact" id="dr_impact_hidden" value="">
@@ -963,6 +1054,14 @@
                         <input type="hidden" name="dr_mitigation" id="dr_mitigation_hidden" value="">
                         <input type="hidden" name="dr_owner" id="dr_owner_hidden" value="">
                         <input type="hidden" name="dr_status" id="dr_status_hidden" value="">
+                        
+                        <!-- Additional fields for controller compatibility -->
+                        <input type="hidden" name="dr_impact" id="dr_impact" value="">
+                        <input type="hidden" name="dr_likelihood" id="dr_likelihood" value="">
+                        <input type="hidden" name="dr_risk_rating" id="dr_risk_rating" value="">
+                        <input type="hidden" name="dr_mitigation" id="dr_mitigation" value="">
+                        <input type="hidden" name="dr_owner" id="dr_owner" value="">
+                        <input type="hidden" name="dr_status" id="dr_status" value="">
                         
                         <!-- Overall Assessment Fields -->
                         <input type="hidden" name="total_risk_points" id="total_risk_points_hidden" value="">
@@ -1039,16 +1138,34 @@
 <script>
 // Function to update risk details display and hidden fields
 function updateRiskDetails(selectElement, prefix) {
+    console.log('updateRiskDetails called with prefix:', prefix);
     const selectedOption = selectElement.options[selectElement.selectedIndex];
     
     if (selectedOption.value) {
+        console.log('Selected option:', selectedOption.value, 'Data:', selectedOption.dataset);
         // Update all the detail spans
-        document.getElementById(prefix + '_impact').textContent = selectedOption.dataset.impact;
-        document.getElementById(prefix + '_likelihood').textContent = selectedOption.dataset.likelihood;
-        document.getElementById(prefix + '_rating').textContent = selectedOption.dataset.rating;
-        document.getElementById(prefix + '_owner').textContent = selectedOption.dataset.owner;
-        document.getElementById(prefix + '_status').textContent = selectedOption.dataset.status;
-        document.getElementById(prefix + '_mitigation').textContent = selectedOption.dataset.mitigation;
+        const impactEl = document.getElementById(prefix + '_impact');
+        const likelihoodEl = document.getElementById(prefix + '_likelihood');
+        const ratingEl = document.getElementById(prefix + '_rating');
+        const ownerEl = document.getElementById(prefix + '_owner');
+        const statusEl = document.getElementById(prefix + '_status');
+        const mitigationEl = document.getElementById(prefix + '_mitigation');
+        
+        console.log('Elements found:', {
+            impact: !!impactEl,
+            likelihood: !!likelihoodEl,
+            rating: !!ratingEl,
+            owner: !!ownerEl,
+            status: !!statusEl,
+            mitigation: !!mitigationEl
+        });
+        
+        if (impactEl) impactEl.textContent = selectedOption.dataset.impact || '-';
+        if (likelihoodEl) likelihoodEl.textContent = selectedOption.dataset.likelihood || '-';
+        if (ratingEl) ratingEl.textContent = selectedOption.dataset.rating || '-';
+        if (ownerEl) ownerEl.textContent = selectedOption.dataset.owner || '-';
+        if (statusEl) statusEl.textContent = selectedOption.dataset.status || '-';
+        if (mitigationEl) mitigationEl.textContent = selectedOption.dataset.mitigation || '-';
         
         // Calculate and display points based on risk rating
         const riskRating = selectedOption.dataset.rating;
@@ -1057,14 +1174,18 @@ function updateRiskDetails(selectElement, prefix) {
         else if (riskRating === 'Medium') points = 3;
         else if (riskRating === 'Low') points = 1;
         
-        document.getElementById(prefix + '_points').textContent = points;
-        document.getElementById(prefix + '_points').className = 'points-badge points-' + points;
+        const pointsEl = document.getElementById(prefix + '_points');
+        console.log('Points element found:', !!pointsEl, 'Points value:', points);
+        if (pointsEl) {
+            pointsEl.textContent = points;
+            pointsEl.className = 'points-badge points-' + points;
+        }
         
         // Update badge classes for styling
-        document.getElementById(prefix + '_impact').className = 'risk-badge impact-' + selectedOption.dataset.impact.toLowerCase();
-        document.getElementById(prefix + '_likelihood').className = 'risk-badge likelihood-' + selectedOption.dataset.impact.toLowerCase();
-        document.getElementById(prefix + '_rating').className = 'risk-badge rating-' + selectedOption.dataset.rating.toLowerCase();
-        document.getElementById(prefix + '_status').className = 'status-badge status-' + selectedOption.dataset.status.toLowerCase();
+        if (impactEl) impactEl.className = 'risk-badge impact-' + selectedOption.dataset.impact.toLowerCase();
+        if (likelihoodEl) likelihoodEl.className = 'risk-badge likelihood-' + selectedOption.dataset.impact.toLowerCase();
+        if (ratingEl) ratingEl.className = 'risk-badge rating-' + selectedOption.dataset.rating.toLowerCase();
+        if (statusEl) statusEl.className = 'status-badge status-' + selectedOption.dataset.status.toLowerCase();
         
         // Update comprehensive hidden fields for form submission
         document.getElementById(prefix + '_risk_id').value = selectedOption.value;
@@ -1076,6 +1197,21 @@ function updateRiskDetails(selectElement, prefix) {
         document.getElementById(prefix + '_mitigation_hidden').value = selectedOption.dataset.mitigation;
         document.getElementById(prefix + '_owner_hidden').value = selectedOption.dataset.owner;
         document.getElementById(prefix + '_status_hidden').value = selectedOption.dataset.status;
+        
+        // Also update the fields without _hidden suffix for controller compatibility
+        const impactField = document.getElementById(prefix + '_impact');
+        const likelihoodField = document.getElementById(prefix + '_likelihood');
+        const ratingField = document.getElementById(prefix + '_risk_rating');
+        const mitigationField = document.getElementById(prefix + '_mitigation');
+        const ownerField = document.getElementById(prefix + '_owner');
+        const statusField = document.getElementById(prefix + '_status');
+        
+        if (impactField) impactField.value = selectedOption.dataset.impact;
+        if (likelihoodField) likelihoodField.value = selectedOption.dataset.likelihood;
+        if (ratingField) ratingField.value = selectedOption.dataset.rating;
+        if (mitigationField) mitigationField.value = selectedOption.dataset.mitigation;
+        if (ownerField) ownerField.value = selectedOption.dataset.owner;
+        if (statusField) statusField.value = selectedOption.dataset.status;
         
         // Update legacy fields for backward compatibility (use highest risk values)
         updateLegacyFields();
@@ -1361,7 +1497,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const minorVal = isMinor ? isMinor.value : '';
         document.querySelectorAll('.minor-only').forEach(function(el){ 
-            const isVisible = (type === 'Individual' && minorVal === '1');
+            const isVisible = (type === 'Individual' && nat === 'Namibian' && minorVal === '1');
+            el.style.display = isVisible ? '' : 'none';
+            // Disable inputs in hidden sections
+            el.querySelectorAll('input, select, textarea').forEach(input => {
+                input.disabled = !isVisible;
+                if (!isVisible) input.value = '';
+            });
+        });
+        
+        // Handle adult-only fields (Namibian adults - not minors)
+        document.querySelectorAll('.adult-only').forEach(function(el){ 
+            const isVisible = (type === 'Individual' && nat === 'Namibian' && minorVal === '0');
             el.style.display = isVisible ? '' : 'none';
             // Disable inputs in hidden sections
             el.querySelectorAll('input, select, textarea').forEach(input => {
@@ -1458,8 +1605,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const incomeSource = document.getElementById('income_source');
         if (incomeSource) {
-            incomeSource.required = (type === 'Juristic');
-            incomeSource.disabled = (type !== 'Juristic');
+            incomeSource.required = true; // Always required
+            incomeSource.disabled = false; // Never disabled
         }
 
         // Toggle ID/Passport number fields visibility and requirement
@@ -2057,11 +2204,11 @@ function updateAllHiddenFields() {
     
     // Debug logging
     // console.log('Updated hidden fields:', {
-        screening_status: screeningStatus,
-        dcs_risk_appetite: dcsRiskAppetite,
-        client_screening_date: document.getElementById('client_screening_date_hidden').value,
-        client_screening_result: document.getElementById('client_screening_result_hidden').value
-    });
+    //     screening_status: screeningStatus,
+    //     dcs_risk_appetite: dcsRiskAppetite,
+    //     client_screening_date: document.getElementById('client_screening_date_hidden').value,
+    //     client_screening_result: document.getElementById('client_screening_result_hidden').value
+    // });
 }
 
 // Add form submission event listener
