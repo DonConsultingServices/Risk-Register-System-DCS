@@ -1513,8 +1513,8 @@
             if (!modalEl || !frame) { window.open(url, '_blank'); return; }
             frame.src = url;
             // Use Bootstrap if available; otherwise fallback to new tab
-            if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
-                const modal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
                 // Clear iframe on close to release focus and avoid blocking UI
                 modalEl.addEventListener('hidden.bs.modal', function onHide(){
                     frame.src = 'about:blank';
@@ -1966,8 +1966,12 @@ function viewClientHistory(clientName, clientId) {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     
     // Show modal
-    const modal = new bootstrap.Modal(document.getElementById('clientHistoryModal'));
-    modal.show();
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modal = new bootstrap.Modal(document.getElementById('clientHistoryModal'));
+        modal.show();
+    } else {
+        console.error('Bootstrap Modal is not available');
+    }
     
     // Load client history
     loadClientHistory(clientName, clientId);

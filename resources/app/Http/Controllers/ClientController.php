@@ -265,31 +265,24 @@ class ClientController extends Controller
         // Auto-heal on view
         $this->ensureClientDataIntegrity($client);
 
-        // Load KYC data from risks table (same as main show method)
+        // Load KYC data from clients table (only columns that exist)
         $kycData = DB::select("
             SELECT client_type, gender, nationality, is_minor, id_number, passport_number, 
-                   registration_number, entity_type, trading_address, income_source,
-                   id_document_path, birth_certificate_path, passport_document_path, 
+                   registration_number, entity_type, trading_address, income_source
+            FROM clients 
+            WHERE id = ? AND deleted_at IS NULL 
+            LIMIT 1
+        ", [$client->id]);
+
+        // Load document paths from risks table (where they actually exist)
+        $documentData = DB::select("
+            SELECT id_document_path, birth_certificate_path, passport_document_path, 
                    proof_of_residence_path, kyc_form_path
             FROM risks 
             WHERE client_id = ? AND deleted_at IS NULL 
             ORDER BY created_at DESC 
             LIMIT 1
         ", [$client->id]);
-
-        // If no KYC data found by client_id, try searching by client name (legacy support)
-        if (empty($kycData)) {
-            $kycData = DB::select("
-                SELECT client_type, gender, nationality, is_minor, id_number, passport_number, 
-                       registration_number, entity_type, trading_address, income_source,
-                       id_document_path, birth_certificate_path, passport_document_path, 
-                       proof_of_residence_path, kyc_form_path
-                FROM risks 
-                WHERE client_name = ? AND deleted_at IS NULL 
-                ORDER BY created_at DESC 
-                LIMIT 1
-            ", [$client->name]);
-        }
 
         // Merge KYC data into client object
         if (!empty($kycData)) {
@@ -304,11 +297,16 @@ class ClientController extends Controller
             $client->entity_type = $kyc->entity_type;
             $client->trading_address = $kyc->trading_address;
             $client->income_source = $kyc->income_source;
-            $client->id_document_path = $kyc->id_document_path;
-            $client->birth_certificate_path = $kyc->birth_certificate_path;
-            $client->passport_document_path = $kyc->passport_document_path;
-            $client->proof_of_residence_path = $kyc->proof_of_residence_path;
-            $client->kyc_form_path = $kyc->kyc_form_path;
+        }
+
+        // Merge document data into client object
+        if (!empty($documentData)) {
+            $docs = $documentData[0];
+            $client->id_document_path = $docs->id_document_path;
+            $client->birth_certificate_path = $docs->birth_certificate_path;
+            $client->passport_document_path = $docs->passport_document_path;
+            $client->proof_of_residence_path = $docs->proof_of_residence_path;
+            $client->kyc_form_path = $docs->kyc_form_path;
         }
 
         return view('clients.modal-details', compact('client'));

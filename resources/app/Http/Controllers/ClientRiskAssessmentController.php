@@ -102,18 +102,24 @@ class ClientRiskAssessmentController extends Controller
                 $clientStatus = 'Pending';
             }
 
-            // Prepare client data
+            // Prepare client data - ALWAYS populate all fields with defaults
             $clientData = [
                 'name' => $validated['client_name'],
-                'email' => $validated['client_email'] ?? null,
-                'phone' => $validated['client_phone'] ?? null,
-                'company' => $validated['client_company'] ?? null,
-                'industry' => $validated['client_industry'] ?? null,
+                'email' => $validated['client_email'] ?? $validated['client_name'] . '@example.com',
+                'phone' => $validated['client_phone'] ?? 'Not Provided',
+                'company' => $validated['company_name'] ?? 'Not Specified',
+                'industry' => $validated['client_industry'] ?? 'Not Specified',
                 'client_screening_date' => $validated['screening_date'],
                 'client_screening_result' => $validated['screening_result'],
                 'status' => $clientStatus,
                 'assessment_status' => $assessmentStatus,
                 'created_by' => auth()->id(),
+                // Add KYC fields with defaults
+                'client_type' => $validated['client_type'] ?? 'Individual',
+                'nationality' => $validated['nationality'] ?? 'Namibian',
+                'is_minor' => $validated['is_minor'] ?? false,
+                'income_source' => $validated['income_source'] ?? 'Not Specified',
+                'gender' => $validated['gender'] ?? 'Not Specified',
             ];
 
             // Add rejection reason if client is automatically rejected
@@ -182,10 +188,8 @@ class ClientRiskAssessmentController extends Controller
                 ]);
             }
 
-            // If admin created the client, create comprehensive risk assessment
-            if (auth()->user()->isAdmin()) {
-                $this->createComprehensiveRiskAssessment($client);
-            }
+            // Create comprehensive risk assessment for ALL users (not just admins)
+            $this->createComprehensiveRiskAssessment($client);
 
             DB::commit();
 
@@ -307,33 +311,68 @@ class ClientRiskAssessmentController extends Controller
                 ]);
             }
 
-            // Prepare comprehensive risk assessment data
+            // Calculate points for each category based on OFFICIAL RISK ASSESSMENT TABLE
+            $totalPoints = $client->overall_risk_points ?? 0;
+            
+            // Use the SAME calculation logic as RiskController and JavaScript
+            // This ensures consistency across all routes
+            $crPoints = min(5, max(1, intval($totalPoints / 4))); // 25% of total
+            $srPoints = min(5, max(1, intval($totalPoints / 4))); // 25% of total  
+            $prPoints = min(5, max(1, intval($totalPoints / 4))); // 25% of total
+            $drPoints = $totalPoints - ($crPoints + $srPoints + $prPoints); // Remaining points
+            
+            // Ensure DR points is not negative
+            if ($drPoints < 1) $drPoints = 1;
+            
+            // Prepare comprehensive risk assessment data with calculated points
             $comprehensiveData = [
                 'risk_id' => $firstRisk->id,
                 'cr_risk_id' => 'CR-' . str_pad($client->id, 2, '0', STR_PAD_LEFT),
                 'cr_risk_name' => 'Client Risk Assessment',
-                'cr_impact' => $this->getImpactFromRating($client->overall_risk_rating ?? 'Low'),
-                'cr_likelihood' => $this->getLikelihoodFromRating($client->overall_risk_rating ?? 'Low'),
-                'cr_risk_rating' => $this->normalizeRiskRating($client->overall_risk_rating ?? 'Low'),
+                'cr_impact' => $this->getImpactFromPoints($crPoints),
+                'cr_likelihood' => $this->getLikelihoodFromPoints($crPoints),
+                'cr_risk_rating' => $this->getRiskRatingFromPoints($crPoints),
+                'cr_points' => $crPoints,
+                'cr_mitigation' => 'Standard client risk mitigation measures',
+                'cr_owner' => 'Risk Manager',
                 'cr_status' => 'Open',
+                
                 'sr_risk_id' => 'SR-' . str_pad($client->id, 2, '0', STR_PAD_LEFT),
                 'sr_risk_name' => 'Service Risk Assessment',
-                'sr_impact' => $this->getImpactFromRating($client->overall_risk_rating ?? 'Low'),
-                'sr_likelihood' => $this->getLikelihoodFromRating($client->overall_risk_rating ?? 'Low'),
-                'sr_risk_rating' => $this->normalizeRiskRating($client->overall_risk_rating ?? 'Low'),
+                'sr_impact' => $this->getImpactFromPoints($srPoints),
+                'sr_likelihood' => $this->getLikelihoodFromPoints($srPoints),
+                'sr_risk_rating' => $this->getRiskRatingFromPoints($srPoints),
+                'sr_points' => $srPoints,
+                'sr_mitigation' => 'Standard service risk mitigation measures',
+                'sr_owner' => 'Risk Manager',
                 'sr_status' => 'Open',
+                
                 'pr_risk_id' => 'PR-' . str_pad($client->id, 2, '0', STR_PAD_LEFT),
-                'pr_risk_name' => 'Process Risk Assessment',
-                'pr_impact' => $this->getImpactFromRating($client->overall_risk_rating ?? 'Low'),
-                'pr_likelihood' => $this->getLikelihoodFromRating($client->overall_risk_rating ?? 'Low'),
-                'pr_risk_rating' => $this->normalizeRiskRating($client->overall_risk_rating ?? 'Low'),
+                'pr_risk_name' => 'Payment Risk Assessment',
+                'pr_impact' => $this->getImpactFromPoints($prPoints),
+                'pr_likelihood' => $this->getLikelihoodFromPoints($prPoints),
+                'pr_risk_rating' => $this->getRiskRatingFromPoints($prPoints),
+                'pr_points' => $prPoints,
+                'pr_mitigation' => 'Standard payment risk mitigation measures',
+                'pr_owner' => 'Risk Manager',
                 'pr_status' => 'Open',
+                
                 'dr_risk_id' => 'DR-' . str_pad($client->id, 2, '0', STR_PAD_LEFT),
-                'dr_risk_name' => 'Data Risk Assessment',
-                'dr_impact' => $this->getImpactFromRating($client->overall_risk_rating ?? 'Low'),
-                'dr_likelihood' => $this->getLikelihoodFromRating($client->overall_risk_rating ?? 'Low'),
-                'dr_risk_rating' => $this->normalizeRiskRating($client->overall_risk_rating ?? 'Low'),
+                'dr_risk_name' => 'Delivery Risk Assessment',
+                'dr_impact' => $this->getImpactFromPoints($drPoints),
+                'dr_likelihood' => $this->getLikelihoodFromPoints($drPoints),
+                'dr_risk_rating' => $this->getRiskRatingFromPoints($drPoints),
+                'dr_points' => $drPoints,
+                'dr_mitigation' => 'Standard delivery risk mitigation measures',
+                'dr_owner' => 'Risk Manager',
                 'dr_status' => 'Open',
+                
+                'total_points' => $totalPoints,
+                'overall_risk_rating' => $this->calculateOverallRiskRating($totalPoints),
+                'client_acceptance' => $this->calculateClientAcceptance($totalPoints),
+                'ongoing_monitoring' => $this->calculateMonitoringFrequency($totalPoints),
+                'created_by' => auth()->id() ?? 1,
+                'updated_by' => auth()->id() ?? 1,
             ];
 
             // Create the comprehensive risk assessment
@@ -390,5 +429,68 @@ class ClientRiskAssessmentController extends Controller
         } else {
             return 'Low';
         }
+    }
+
+    /**
+     * Get impact level from points based on OFFICIAL TABLE
+     */
+    private function getImpactFromPoints($points)
+    {
+        if ($points >= 5) return 'High';
+        if ($points >= 3) return 'Medium';
+        return 'Low';
+    }
+
+    /**
+     * Get likelihood level from points based on OFFICIAL TABLE
+     */
+    private function getLikelihoodFromPoints($points)
+    {
+        if ($points >= 5) return 'High';
+        if ($points >= 3) return 'Medium';
+        return 'Low';
+    }
+
+    /**
+     * Get risk rating from points based on OFFICIAL TABLE
+     */
+    private function getRiskRatingFromPoints($points)
+    {
+        if ($points >= 5) return 'High';
+        if ($points >= 3) return 'Medium';
+        return 'Low';
+    }
+
+    /**
+     * Calculate overall risk rating based on OFFICIAL TABLE
+     */
+    private function calculateOverallRiskRating($totalPoints)
+    {
+        if ($totalPoints >= 20) return 'Very High-risk';
+        if ($totalPoints >= 17) return 'High-risk';
+        if ($totalPoints >= 15) return 'Medium-risk';
+        if ($totalPoints >= 10) return 'Low-risk';
+        return 'Low-risk';
+    }
+
+    /**
+     * Calculate client acceptance based on OFFICIAL TABLE
+     */
+    private function calculateClientAcceptance($totalPoints)
+    {
+        if ($totalPoints >= 20) return 'Do not accept client';
+        return 'Accept client';
+    }
+
+    /**
+     * Calculate monitoring frequency based on OFFICIAL TABLE
+     */
+    private function calculateMonitoringFrequency($totalPoints)
+    {
+        if ($totalPoints >= 20) return 'N/A';
+        if ($totalPoints >= 17) return 'Quarterly review';
+        if ($totalPoints >= 15) return 'Bi-Annually';
+        if ($totalPoints >= 10) return 'Annually';
+        return 'Annually';
     }
 }

@@ -1079,14 +1079,16 @@ function cleanupModals() {
     document.body.style.overflow = '';
     document.body.style.paddingRight = '';
     
-    // Dispose of all modal instances
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        const modalInstance = bootstrap.Modal.getInstance(modal);
-        if (modalInstance) {
-            modalInstance.dispose();
-        }
-    });
+    // Dispose of all modal instances (only if Bootstrap is available)
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.dispose();
+            }
+        });
+    }
 }
 
 // Add event listeners for modal cleanup
@@ -1438,7 +1440,7 @@ function printReport() {
                 <strong>Contact Information:</strong><br>
                 Email: ITSupport@dcs.com.na | info@dcs.com.na<br>
                 Phone: +264 82 403 2391<br>
-                Address: No 41, Johann and Sturrock, Windhoek, Namibia<br>
+                Address: No 41, Johann and Sturrock st, Windhoek, Namibia<br>
                 Website: www.dcs.com.na
             </p>
             <p style="margin-top: 10px; font-size: 9px; color: #999;">

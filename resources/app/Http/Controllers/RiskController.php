@@ -161,6 +161,7 @@ class RiskController extends Controller
             'entity_type' => 'nullable|string|max:50',
             'trading_address' => 'nullable|string|max:255',
             'income_source' => 'nullable|string|max:255',
+            'company_name' => 'nullable|string|max:255',
             'client_email' => 'required|email|max:255',
             'client_industry' => 'required|string',
             // Prohibit opposite document based on minor selection
@@ -246,10 +247,29 @@ class RiskController extends Controller
         // Calculate total risk points from form data
         $totalPoints = $srPoints + $crPoints + $prPoints + $drPoints;
         
-        // Get overall assessment from form
-        $overallRiskRating = $request->overall_risk_rating ?: 'Low-risk';
-        $clientAcceptance = $request->client_acceptance ?: 'Accept client';
-        $ongoingMonitoring = $request->ongoing_monitoring ?: 'Annually';
+        // Calculate overall assessment based on OFFICIAL RISK ASSESSMENT TABLE
+        // This ensures consistency across all routes
+        if ($totalPoints >= 20) {
+            $overallRiskRating = 'Very High-risk';
+            $clientAcceptance = 'Do not accept client';
+            $ongoingMonitoring = 'N/A';
+        } elseif ($totalPoints >= 17) {
+            $overallRiskRating = 'High-risk';
+            $clientAcceptance = 'Accept client';
+            $ongoingMonitoring = 'Quarterly review';
+        } elseif ($totalPoints >= 15) {
+            $overallRiskRating = 'Medium-risk';
+            $clientAcceptance = 'Accept client';
+            $ongoingMonitoring = 'Bi-Annually';
+        } elseif ($totalPoints >= 10) {
+            $overallRiskRating = 'Low-risk';
+            $clientAcceptance = 'Accept client';
+            $ongoingMonitoring = 'Annually';
+        } else {
+            $overallRiskRating = 'Low-risk';
+            $clientAcceptance = 'Accept client';
+            $ongoingMonitoring = 'Annually';
+        }
         
         // Generate unique risk ID (use the first selection as primary)
         $primaryRiskId = $request->sr_selection ?: $request->cr_selection ?: $request->pr_selection ?: $request->dr_selection;
@@ -266,8 +286,8 @@ class RiskController extends Controller
             [
                 'name' => $request->client_name,
                 'email' => $request->client_email ?: $request->client_name . '@example.com',
-                'phone' => 'N/A',
-                'address' => 'N/A',
+                'phone' => $request->client_phone ?? 'Not Provided',
+                'address' => $request->client_address ?? 'Not Provided',
                 'status' => 'Active',
                 'assessment_status' => $approvalStatus, // Set the correct assessment status
                 'created_by' => auth()->id(), // Track who created the assessment
@@ -283,11 +303,13 @@ class RiskController extends Controller
                 'dcs_risk_appetite' => $request->dcs_risk_appetite ?? 'Moderate',
                 'dcs_comments' => $request->dcs_comments ?? 'Risk assessment completed via system',
                 'industry' => $request->client_industry ?: 'Not Specified',
-                // Add KYC fields
-                'client_type' => $request->client_type,
-                'gender' => $request->client_type === 'Individual' ? $request->gender : null,
-                'nationality' => $request->client_type === 'Individual' ? $request->nationality : null,
-                'is_minor' => $request->client_type === 'Individual' ? $request->is_minor : null,
+                'company' => $request->company_name ?? 'Not Specified',
+                // Add KYC fields - ALWAYS populate these fields
+                'client_type' => $request->client_type ?? 'Individual',
+                'gender' => $request->client_type === 'Individual' ? ($request->gender ?? 'Not Specified') : null,
+                'nationality' => $request->client_type === 'Individual' ? ($request->nationality ?? 'Namibian') : null,
+                'is_minor' => $request->client_type === 'Individual' ? ($request->is_minor ?? false) : null,
+                'income_source' => $request->income_source ?? 'Not Specified',
                 'id_number' => $request->client_type === 'Individual' && $request->nationality === 'Namibian' && !$request->is_minor ? $request->id_number : null,
                 'passport_number' => $request->client_type === 'Individual' && $request->nationality === 'Foreign' && !$request->is_minor ? $request->passport_number : null,
                 'registration_number' => $request->client_type === 'Juristic' ? $request->registration_number : null,

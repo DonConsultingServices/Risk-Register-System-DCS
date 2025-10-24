@@ -1167,12 +1167,23 @@ function updateRiskDetails(selectElement, prefix) {
         if (statusEl) statusEl.textContent = selectedOption.dataset.status || '-';
         if (mitigationEl) mitigationEl.textContent = selectedOption.dataset.mitigation || '-';
         
-        // Calculate and display points based on risk rating
-        const riskRating = selectedOption.dataset.rating;
+        // Calculate points based on OFFICIAL RISK ASSESSMENT TABLE
+        const impact = selectedOption.dataset.impact;
+        const likelihood = selectedOption.dataset.likelihood;
+        
+        // OFFICIAL POINTS CALCULATION FROM YOUR TABLE
         let points = 0;
-        if (riskRating === 'High') points = 5;
-        else if (riskRating === 'Medium') points = 3;
-        else if (riskRating === 'Low') points = 1;
+        
+        if (impact === 'High' && likelihood === 'High') points = 5;
+        else if (impact === 'High' && likelihood === 'Medium') points = 5; // CR-01: High/Medium = 5 points
+        else if (impact === 'High' && likelihood === 'Low') points = 3;
+        else if (impact === 'Medium' && likelihood === 'High') points = 4; // CR-02: Medium/High = 4 points
+        else if (impact === 'Medium' && likelihood === 'Medium') points = 3; // CR-03, SR-02, PR-02: Medium/Medium = 3 points
+        else if (impact === 'Medium' && likelihood === 'Low') points = 2; // DR-02: Medium/Low = 2 points
+        else if (impact === 'Low' && likelihood === 'High') points = 2;
+        else if (impact === 'Low' && likelihood === 'Medium') points = 1; // SR-03, PR-03: Low/Medium = 1 point
+        else if (impact === 'Low' && likelihood === 'Low') points = 1;
+        else points = 0;
         
         const pointsEl = document.getElementById(prefix + '_points');
         console.log('Points element found:', !!pointsEl, 'Points value:', points);
@@ -1331,7 +1342,7 @@ function calculateOverallRisk() {
     // Update total points display
     document.getElementById('totalPoints').textContent = totalPoints;
     
-    // Determine overall risk rating and client decision based on total points
+    // Determine overall risk rating based on OFFICIAL TABLE
     let overallRiskRating = 'Not Calculated';
     let clientDecision = 'Pending';
     let monitoringFrequency = '-';
