@@ -39,11 +39,11 @@ class RiskApprovalController extends Controller
             // Remove any duplicates based on ID (extra safety)
             $risks = $risks->unique('id');
             
-            // Get counts for all statuses using Eloquent
+            // Get counts based on client assessment status (not risk approval status)
             $stats = (object)[
-                'pending' => Risk::where('approval_status', 'pending')->count(),
-                'approved' => Risk::where('approval_status', 'approved')->count(),
-                'rejected' => Risk::where('approval_status', 'rejected')->count()
+                'pending' => \App\Models\Client::where('assessment_status', 'pending')->whereNull('deleted_at')->count(),
+                'approved' => \App\Models\Client::where('assessment_status', 'approved')->whereNull('deleted_at')->count(),
+                'rejected' => \App\Models\Client::where('assessment_status', 'rejected')->whereNull('deleted_at')->count()
             ];
 
             // For backward compatibility, keep pendingRisks variable
@@ -201,10 +201,10 @@ class RiskApprovalController extends Controller
     public function stats()
     {
         $stats = [
-            'pending' => Risk::where('approval_status', 'pending')->whereNull('deleted_at')->count(),
-            'approved' => Risk::where('approval_status', 'approved')->whereNull('deleted_at')->count(),
-            'rejected' => Risk::where('approval_status', 'rejected')->whereNull('deleted_at')->count(),
-            'total' => Risk::whereNull('deleted_at')->count()
+            'pending' => \App\Models\Client::where('assessment_status', 'pending')->whereNull('deleted_at')->count(),
+            'approved' => \App\Models\Client::where('assessment_status', 'approved')->whereNull('deleted_at')->count(),
+            'rejected' => \App\Models\Client::where('assessment_status', 'rejected')->whereNull('deleted_at')->count(),
+            'total' => \App\Models\Client::whereNull('deleted_at')->count()
         ];
 
         return response()->json($stats);
