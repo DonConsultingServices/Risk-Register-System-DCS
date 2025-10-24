@@ -257,10 +257,9 @@ class RiskController extends Controller
         $riskId = $primaryRiskId;
 
         // Determine approval status based on user role
-        $approvalStatus = 'approved'; // Default for managers and admins
-        if (auth()->user()->isStaff()) {
-            $approvalStatus = 'pending'; // Staff users need approval
-        }
+        // Staff users can approve their own risk assessments
+        // Only external/non-staff users need approval
+        $approvalStatus = 'approved'; // Default for all authenticated users
 
         // First, create or update the client record
         $client = \App\Models\Client::updateOrCreate(
