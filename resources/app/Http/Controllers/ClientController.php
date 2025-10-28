@@ -82,25 +82,14 @@ class ClientController extends Controller
                 cra.overall_risk_rating as comprehensive_rating,
                 cra.client_acceptance as comprehensive_acceptance,
                 cra.ongoing_monitoring as comprehensive_monitoring,
-                cra.cr_risk_id, cra.cr_risk_name, cra.cr_impact, cra.cr_risk_rating,
-                cra.sr_risk_id, cra.sr_risk_name, cra.sr_impact, cra.sr_risk_rating,
-                cra.pr_risk_id, cra.pr_risk_name, cra.pr_impact, cra.pr_risk_rating,
+                cra.cr_risk_id, cra.cr_risk_name, cra.cr_impact, cra.cr_likelihood, cra.cr_risk_rating,
+                cra.sr_risk_id, cra.sr_risk_name, cra.sr_impact, cra.sr_likelihood, cra.sr_risk_rating,
+                cra.pr_risk_id, cra.pr_risk_name, cra.pr_impact, cra.pr_likelihood, cra.pr_risk_rating,
                 cra.dr_risk_id, cra.dr_risk_name, cra.dr_impact, cra.dr_likelihood, cra.dr_risk_rating,
                 cra.total_points, cra.overall_risk_rating as cra_overall_risk_rating
             FROM clients c
-            LEFT JOIN comprehensive_risk_assessments cra ON c.id = (
-                SELECT r.client_id 
-                FROM risks r 
-                WHERE r.client_id = c.id AND r.deleted_at IS NULL 
-                ORDER BY r.created_at DESC 
-                LIMIT 1
-            ) AND cra.risk_id = (
-                SELECT r.id 
-                FROM risks r 
-                WHERE r.client_id = c.id AND r.deleted_at IS NULL 
-                ORDER BY r.created_at DESC 
-                LIMIT 1
-            )
+            LEFT JOIN risks r ON c.id = r.client_id AND r.deleted_at IS NULL
+            LEFT JOIN comprehensive_risk_assessments cra ON r.id = cra.risk_id
             WHERE c.assessment_status = 'approved' 
             AND c.deleted_at IS NULL
             ORDER BY c.name, c.created_at DESC

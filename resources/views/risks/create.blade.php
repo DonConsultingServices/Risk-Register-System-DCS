@@ -993,72 +993,40 @@
                         <!-- Comprehensive Risk Details from All Categories -->
                         <input type="hidden" name="sr_risk_id" id="sr_risk_id" value="">
                         <input type="hidden" name="sr_risk_name" id="sr_risk_name" value="">
-                        <input type="hidden" name="sr_impact" id="sr_impact_hidden" value="">
-                        <input type="hidden" name="sr_likelihood" id="sr_likelihood_hidden" value="">
-                        <input type="hidden" name="sr_risk_rating" id="sr_risk_rating_hidden" value="">
-                        <input type="hidden" name="sr_points" id="sr_points_hidden" value="">
-                        <input type="hidden" name="sr_mitigation" id="sr_mitigation_hidden" value="">
-                        <input type="hidden" name="sr_owner" id="sr_owner_hidden" value="">
-                        <input type="hidden" name="sr_status" id="sr_status_hidden" value="">
-                        
-                        <!-- Additional fields for controller compatibility -->
                         <input type="hidden" name="sr_impact" id="sr_impact" value="">
                         <input type="hidden" name="sr_likelihood" id="sr_likelihood" value="">
                         <input type="hidden" name="sr_risk_rating" id="sr_risk_rating" value="">
+                        <input type="hidden" name="sr_points" id="sr_points_input" value="">
                         <input type="hidden" name="sr_mitigation" id="sr_mitigation" value="">
                         <input type="hidden" name="sr_owner" id="sr_owner" value="">
                         <input type="hidden" name="sr_status" id="sr_status" value="">
                         
                         <input type="hidden" name="cr_risk_id" id="cr_risk_id" value="">
                         <input type="hidden" name="cr_risk_name" id="cr_risk_name" value="">
-                        <input type="hidden" name="cr_impact" id="cr_impact_hidden" value="">
-                        <input type="hidden" name="cr_likelihood" id="cr_likelihood_hidden" value="">
-                        <input type="hidden" name="cr_risk_rating" id="cr_risk_rating_hidden" value="">
-                        <input type="hidden" name="cr_points" id="cr_points_hidden" value="">
-                        <input type="hidden" name="cr_mitigation" id="cr_mitigation_hidden" value="">
-                        <input type="hidden" name="cr_owner" id="cr_owner_hidden" value="">
-                        <input type="hidden" name="cr_status" id="cr_status_hidden" value="">
-                        
-                        <!-- Additional fields for controller compatibility -->
                         <input type="hidden" name="cr_impact" id="cr_impact" value="">
                         <input type="hidden" name="cr_likelihood" id="cr_likelihood" value="">
                         <input type="hidden" name="cr_risk_rating" id="cr_risk_rating" value="">
+                        <input type="hidden" name="cr_points" id="cr_points_input" value="">
                         <input type="hidden" name="cr_mitigation" id="cr_mitigation" value="">
                         <input type="hidden" name="cr_owner" id="cr_owner" value="">
                         <input type="hidden" name="cr_status" id="cr_status" value="">
                         
                         <input type="hidden" name="pr_risk_id" id="pr_risk_id" value="">
                         <input type="hidden" name="pr_risk_name" id="pr_risk_name" value="">
-                        <input type="hidden" name="pr_impact" id="pr_impact_hidden" value="">
-                        <input type="hidden" name="pr_likelihood" id="pr_likelihood_hidden" value="">
-                        <input type="hidden" name="pr_risk_rating" id="pr_risk_rating_hidden" value="">
-                        <input type="hidden" name="pr_points" id="pr_points_hidden" value="">
-                        <input type="hidden" name="pr_mitigation" id="pr_mitigation_hidden" value="">
-                        <input type="hidden" name="pr_owner" id="pr_owner_hidden" value="">
-                        <input type="hidden" name="pr_status" id="pr_status_hidden" value="">
-                        
-                        <!-- Additional fields for controller compatibility -->
                         <input type="hidden" name="pr_impact" id="pr_impact" value="">
                         <input type="hidden" name="pr_likelihood" id="pr_likelihood" value="">
                         <input type="hidden" name="pr_risk_rating" id="pr_risk_rating" value="">
+                        <input type="hidden" name="pr_points" id="pr_points_input" value="">
                         <input type="hidden" name="pr_mitigation" id="pr_mitigation" value="">
                         <input type="hidden" name="pr_owner" id="pr_owner" value="">
                         <input type="hidden" name="pr_status" id="pr_status" value="">
                         
                         <input type="hidden" name="dr_risk_id" id="dr_risk_id" value="">
                         <input type="hidden" name="dr_risk_name" id="dr_risk_name" value="">
-                        <input type="hidden" name="dr_impact" id="dr_impact_hidden" value="">
-                        <input type="hidden" name="dr_likelihood" id="dr_likelihood_hidden" value="">
-                        <input type="hidden" name="dr_risk_rating" id="dr_risk_rating_hidden" value="">
-                        <input type="hidden" name="dr_points" id="dr_points_hidden" value="">
-                        <input type="hidden" name="dr_mitigation" id="dr_mitigation_hidden" value="">
-                        <input type="hidden" name="dr_owner" id="dr_owner_hidden" value="">
-                        <input type="hidden" name="dr_status" id="dr_status_hidden" value="">
-                        
-                        <!-- Additional fields for controller compatibility -->
                         <input type="hidden" name="dr_impact" id="dr_impact" value="">
                         <input type="hidden" name="dr_likelihood" id="dr_likelihood" value="">
                         <input type="hidden" name="dr_risk_rating" id="dr_risk_rating" value="">
+                        <input type="hidden" name="dr_points" id="dr_points_input" value="">
                         <input type="hidden" name="dr_mitigation" id="dr_mitigation" value="">
                         <input type="hidden" name="dr_owner" id="dr_owner" value="">
                         <input type="hidden" name="dr_status" id="dr_status" value="">
@@ -1201,31 +1169,20 @@ function updateRiskDetails(selectElement, prefix) {
         // Update comprehensive hidden fields for form submission
         document.getElementById(prefix + '_risk_id').value = selectedOption.value;
         document.getElementById(prefix + '_risk_name').value = selectedOption.dataset.name;
-        document.getElementById(prefix + '_impact_hidden').value = selectedOption.dataset.impact;
-        document.getElementById(prefix + '_likelihood_hidden').value = selectedOption.dataset.likelihood;
-        document.getElementById(prefix + '_risk_rating_hidden').value = selectedOption.dataset.rating;
-        document.getElementById(prefix + '_points_hidden').value = points;
-        document.getElementById(prefix + '_mitigation_hidden').value = selectedOption.dataset.mitigation;
-        document.getElementById(prefix + '_owner_hidden').value = selectedOption.dataset.owner;
-        document.getElementById(prefix + '_status_hidden').value = selectedOption.dataset.status;
-        
-        // Also update the fields without _hidden suffix for controller compatibility
-        const impactField = document.getElementById(prefix + '_impact');
-        const likelihoodField = document.getElementById(prefix + '_likelihood');
-        const ratingField = document.getElementById(prefix + '_risk_rating');
-        const mitigationField = document.getElementById(prefix + '_mitigation');
-        const ownerField = document.getElementById(prefix + '_owner');
-        const statusField = document.getElementById(prefix + '_status');
-        
-        if (impactField) impactField.value = selectedOption.dataset.impact;
-        if (likelihoodField) likelihoodField.value = selectedOption.dataset.likelihood;
-        if (ratingField) ratingField.value = selectedOption.dataset.rating;
-        if (mitigationField) mitigationField.value = selectedOption.dataset.mitigation;
-        if (ownerField) ownerField.value = selectedOption.dataset.owner;
-        if (statusField) statusField.value = selectedOption.dataset.status;
+        document.getElementById(prefix + '_impact').value = selectedOption.dataset.impact;
+        document.getElementById(prefix + '_likelihood').value = selectedOption.dataset.likelihood;
+        document.getElementById(prefix + '_risk_rating').value = selectedOption.dataset.rating;
+        const hiddenPointsEl = document.getElementById(prefix + '_points_input');
+        if (hiddenPointsEl) hiddenPointsEl.value = points;
+        document.getElementById(prefix + '_mitigation').value = selectedOption.dataset.mitigation;
+        document.getElementById(prefix + '_owner').value = selectedOption.dataset.owner;
+        document.getElementById(prefix + '_status').value = selectedOption.dataset.status;
         
         // Update legacy fields for backward compatibility (use highest risk values)
         updateLegacyFields();
+        
+        // Update main form fields for validation
+        updateMainFormFields();
         
         // Calculate overall risk assessment
         calculateOverallRisk();
@@ -1249,13 +1206,14 @@ function updateRiskDetails(selectElement, prefix) {
         // Clear hidden fields
         document.getElementById(prefix + '_risk_id').value = '';
         document.getElementById(prefix + '_risk_name').value = '';
-        document.getElementById(prefix + '_impact_hidden').value = '';
-        document.getElementById(prefix + '_likelihood_hidden').value = '';
-        document.getElementById(prefix + '_risk_rating_hidden').value = '';
-        document.getElementById(prefix + '_points_hidden').value = '';
-        document.getElementById(prefix + '_mitigation_hidden').value = '';
-        document.getElementById(prefix + '_owner_hidden').value = '';
-        document.getElementById(prefix + '_status_hidden').value = '';
+        document.getElementById(prefix + '_impact').value = '';
+        document.getElementById(prefix + '_likelihood').value = '';
+        document.getElementById(prefix + '_risk_rating').value = '';
+        const hiddenPointsEl2 = document.getElementById(prefix + '_points_input');
+        if (hiddenPointsEl2) hiddenPointsEl2.value = '';
+        document.getElementById(prefix + '_mitigation').value = '';
+        document.getElementById(prefix + '_owner').value = '';
+        document.getElementById(prefix + '_status').value = '';
         
         // Recalculate overall risk assessment
         calculateOverallRisk();
@@ -1264,10 +1222,10 @@ function updateRiskDetails(selectElement, prefix) {
 
 // Function to update legacy fields with highest risk values
 function updateLegacyFields() {
-    const srPoints = parseInt(document.getElementById('sr_points_hidden').value) || 0;
-    const crPoints = parseInt(document.getElementById('cr_points_hidden').value) || 0;
-    const prPoints = parseInt(document.getElementById('pr_points_hidden').value) || 0;
-    const drPoints = parseInt(document.getElementById('dr_points_hidden').value) || 0;
+    const srPoints = parseInt(document.getElementById('sr_points').value) || 0;
+    const crPoints = parseInt(document.getElementById('cr_points').value) || 0;
+    const prPoints = parseInt(document.getElementById('pr_points').value) || 0;
+    const drPoints = parseInt(document.getElementById('dr_points').value) || 0;
     
     // Find the risk with highest points for legacy fields
     let highestRisk = { points: 0, impact: '', likelihood: '', rating: '', mitigation: '', owner: '', status: '' };
@@ -1275,59 +1233,136 @@ function updateLegacyFields() {
     if (srPoints > highestRisk.points) {
         highestRisk = {
             points: srPoints,
-            impact: document.getElementById('sr_impact_hidden').value,
-            likelihood: document.getElementById('sr_likelihood_hidden').value,
-            rating: document.getElementById('sr_risk_rating_hidden').value,
-            mitigation: document.getElementById('sr_mitigation_hidden').value,
-            owner: document.getElementById('sr_owner_hidden').value,
-            status: document.getElementById('sr_status_hidden').value
+            impact: document.getElementById('sr_impact').value,
+            likelihood: document.getElementById('sr_likelihood').value,
+            rating: document.getElementById('sr_risk_rating').value,
+            mitigation: document.getElementById('sr_mitigation').value,
+            owner: document.getElementById('sr_owner').value,
+            status: document.getElementById('sr_status').value
         };
     }
     
     if (crPoints > highestRisk.points) {
         highestRisk = {
             points: crPoints,
-            impact: document.getElementById('cr_impact_hidden').value,
-            likelihood: document.getElementById('cr_likelihood_hidden').value,
-            rating: document.getElementById('cr_risk_rating_hidden').value,
-            mitigation: document.getElementById('cr_mitigation_hidden').value,
-            owner: document.getElementById('cr_owner_hidden').value,
-            status: document.getElementById('cr_status_hidden').value
+            impact: document.getElementById('cr_impact').value,
+            likelihood: document.getElementById('cr_likelihood').value,
+            rating: document.getElementById('cr_risk_rating').value,
+            mitigation: document.getElementById('cr_mitigation').value,
+            owner: document.getElementById('cr_owner').value,
+            status: document.getElementById('cr_status').value
         };
     }
     
     if (prPoints > highestRisk.points) {
         highestRisk = {
             points: prPoints,
-            impact: document.getElementById('pr_impact_hidden').value,
-            likelihood: document.getElementById('pr_likelihood_hidden').value,
-            rating: document.getElementById('pr_risk_rating_hidden').value,
-            mitigation: document.getElementById('pr_mitigation_hidden').value,
-            owner: document.getElementById('pr_owner_hidden').value,
-            status: document.getElementById('pr_status_hidden').value
+            impact: document.getElementById('pr_impact').value,
+            likelihood: document.getElementById('pr_likelihood').value,
+            rating: document.getElementById('pr_risk_rating').value,
+            mitigation: document.getElementById('pr_mitigation').value,
+            owner: document.getElementById('pr_owner').value,
+            status: document.getElementById('pr_status').value
         };
     }
     
     if (drPoints > highestRisk.points) {
         highestRisk = {
             points: drPoints,
-            impact: document.getElementById('dr_impact_hidden').value,
-            likelihood: document.getElementById('dr_impact_hidden').value,
-            rating: document.getElementById('dr_risk_rating_hidden').value,
-            mitigation: document.getElementById('dr_mitigation_hidden').value,
-            owner: document.getElementById('dr_owner_hidden').value,
-            status: document.getElementById('dr_status_hidden').value
+            impact: document.getElementById('dr_impact').value,
+            likelihood: document.getElementById('dr_likelihood').value,
+            rating: document.getElementById('dr_risk_rating').value,
+            mitigation: document.getElementById('dr_mitigation').value,
+            owner: document.getElementById('dr_owner').value,
+            status: document.getElementById('dr_status').value
         };
     }
     
     // Update legacy fields with highest risk values
     document.getElementById('risk_description').value = 'Multiple risk categories assessed';
-    document.getElementById('risk_category').value = 'Comprehensive';
+    document.getElementById('risk_category').value = 'Comprehensive Risk Assessment';
     document.getElementById('impact').value = highestRisk.impact;
     document.getElementById('likelihood').value = highestRisk.likelihood;
     document.getElementById('status').value = highestRisk.status;
     document.getElementById('mitigation_strategies').value = highestRisk.mitigation;
     document.getElementById('owner').value = highestRisk.owner;
+}
+
+// Function to update main form fields for validation
+function updateMainFormFields() {
+    // Get the highest risk values from all categories
+    let highestRisk = { impact: '', likelihood: '', status: '', mitigation: '', owner: '' };
+    
+    // Check SR values
+    const srImpact = document.getElementById('sr_impact').value;
+    const srLikelihood = document.getElementById('sr_likelihood').value;
+    const srStatus = document.getElementById('sr_status').value;
+    const srMitigation = document.getElementById('sr_mitigation').value;
+    const srOwner = document.getElementById('sr_owner').value;
+    
+    if (srImpact) {
+        highestRisk.impact = srImpact;
+        highestRisk.likelihood = srLikelihood;
+        highestRisk.status = srStatus;
+        highestRisk.mitigation = srMitigation;
+        highestRisk.owner = srOwner;
+    }
+    
+    // Check CR values
+    const crImpact = document.getElementById('cr_impact').value;
+    const crLikelihood = document.getElementById('cr_likelihood').value;
+    const crStatus = document.getElementById('cr_status').value;
+    const crMitigation = document.getElementById('cr_mitigation').value;
+    const crOwner = document.getElementById('cr_owner').value;
+    
+    if (crImpact) {
+        highestRisk.impact = crImpact;
+        highestRisk.likelihood = crLikelihood;
+        highestRisk.status = crStatus;
+        highestRisk.mitigation = crMitigation;
+        highestRisk.owner = crOwner;
+    }
+    
+    // Check PR values
+    const prImpact = document.getElementById('pr_impact').value;
+    const prLikelihood = document.getElementById('pr_likelihood').value;
+    const prStatus = document.getElementById('pr_status').value;
+    const prMitigation = document.getElementById('pr_mitigation').value;
+    const prOwner = document.getElementById('pr_owner').value;
+    
+    if (prImpact) {
+        highestRisk.impact = prImpact;
+        highestRisk.likelihood = prLikelihood;
+        highestRisk.status = prStatus;
+        highestRisk.mitigation = prMitigation;
+        highestRisk.owner = prOwner;
+    }
+    
+    // Check DR values
+    const drImpact = document.getElementById('dr_impact').value;
+    const drLikelihood = document.getElementById('dr_likelihood').value;
+    const drStatus = document.getElementById('dr_status').value;
+    const drMitigation = document.getElementById('dr_mitigation').value;
+    const drOwner = document.getElementById('dr_owner').value;
+    
+    if (drImpact) {
+        highestRisk.impact = drImpact;
+        highestRisk.likelihood = drLikelihood;
+        highestRisk.status = drStatus;
+        highestRisk.mitigation = drMitigation;
+        highestRisk.owner = drOwner;
+    }
+    
+    // Update main form fields
+    if (highestRisk.impact) {
+        document.getElementById('risk_description').value = 'Multiple risk categories assessed';
+        document.getElementById('risk_category').value = 'Comprehensive Risk Assessment';
+        document.getElementById('impact').value = highestRisk.impact;
+        document.getElementById('likelihood').value = highestRisk.likelihood;
+        document.getElementById('status').value = highestRisk.status;
+        document.getElementById('mitigation_strategies').value = highestRisk.mitigation;
+        document.getElementById('owner').value = highestRisk.owner;
+    }
 }
 
 // Function to calculate overall risk assessment
@@ -1414,27 +1449,56 @@ function calculateOverallRisk() {
     }
 }
 
-// Add event listeners to all risk selection dropdowns
+    // Add event listeners to all risk selection dropdowns
 document.addEventListener('DOMContentLoaded', function() {
     // Service Risk (SR)
-    document.getElementById('sr_selection').addEventListener('change', function() {
-        updateRiskDetails(this, 'sr');
-    });
+    const srSelection = document.getElementById('sr_selection');
+    if (srSelection) {
+        srSelection.addEventListener('change', function() {
+            updateRiskDetails(this, 'sr');
+        });
+    }
     
     // Client Risk (CR)
-    document.getElementById('cr_selection').addEventListener('change', function() {
-        updateRiskDetails(this, 'cr');
-    });
+    const crSelection = document.getElementById('cr_selection');
+    if (crSelection) {
+        crSelection.addEventListener('change', function() {
+            updateRiskDetails(this, 'cr');
+        });
+    }
     
     // Payment Risk (PR)
-    document.getElementById('pr_selection').addEventListener('change', function() {
-        updateRiskDetails(this, 'pr');
-    });
+    const prSelection = document.getElementById('pr_selection');
+    if (prSelection) {
+        prSelection.addEventListener('change', function() {
+            updateRiskDetails(this, 'pr');
+        });
+    }
     
     // Delivery Risk (DR)
-    document.getElementById('dr_selection').addEventListener('change', function() {
-        updateRiskDetails(this, 'dr');
-    });
+    const drSelection = document.getElementById('dr_selection');
+    if (drSelection) {
+        drSelection.addEventListener('change', function() {
+            updateRiskDetails(this, 'dr');
+        });
+    }
+    
+    // Add form submission handler to ensure points are calculated
+    const form = document.getElementById('riskForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Ensure all points are calculated before submission
+            calculateOverallRisk();
+            
+            // Debug: Log final values
+            console.log('Final form submission values:');
+            console.log('SR Points:', document.getElementById('sr_points').value);
+            console.log('CR Points:', document.getElementById('cr_points').value);
+            console.log('PR Points:', document.getElementById('pr_points').value);
+            console.log('DR Points:', document.getElementById('dr_points').value);
+            console.log('Total Points:', document.getElementById('total_risk_points_hidden').value);
+        });
+    }
     
     // Screening Status
     document.getElementById('screening_status').addEventListener('change', function() {
@@ -2139,6 +2203,14 @@ function calculateAcceptance() {
         alert('Please select a risk from each category (SR, CR, PR, DR) before calculating acceptance.');
         return;
     }
+    
+    // Debug: Log the current values
+    console.log('Form values before submission:');
+    console.log('SR Points:', document.getElementById('sr_points').value);
+    console.log('CR Points:', document.getElementById('cr_points').value);
+    console.log('PR Points:', document.getElementById('pr_points').value);
+    console.log('DR Points:', document.getElementById('dr_points').value);
+    console.log('Total Points:', document.getElementById('total_risk_points_hidden').value);
     
     // Get total points and other values
     const totalPoints = parseInt(document.getElementById('totalPoints').textContent) || 0;

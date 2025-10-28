@@ -332,6 +332,7 @@ class RiskController extends Controller
             'title' => $request->risk_description, // Use risk_description as title
             'description' => $request->risk_description, // Use risk_description as description
             'client_name' => $request->client_name,
+            'client_id' => $client->id, // Link to the client
             // client_identification_done field removed - consolidated with screening fields
             'client_screening_date' => $request->client_screening_date ?? $request->assessment_date,
             'client_screening_result' => $request->client_screening_result ?? $request->screening_status,

@@ -36,7 +36,18 @@ class Client extends Model
         'approved_by',
         'approved_at',
         'approval_notes',
-        'rejection_reason'
+        'rejection_reason',
+        // KYC fields
+        'client_type',
+        'gender',
+        'nationality',
+        'is_minor',
+        'id_number',
+        'passport_number',
+        'registration_number',
+        'entity_type',
+        'trading_address',
+        'income_source'
     ];
 
     protected $casts = [
