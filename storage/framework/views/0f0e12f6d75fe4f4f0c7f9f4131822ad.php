@@ -2354,11 +2354,105 @@
                 font-size: 0.75rem;
             }
         }
+        
+        /* Logout Loading Spinner Overlay */
+        .logout-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 7, 45, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            backdrop-filter: blur(10px);
+        }
+        
+        .logout-loading-overlay.active {
+            display: flex !important;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .logout-spinner-container {
+            text-align: center;
+            color: white;
+            animation: scaleIn 0.5s ease-out;
+        }
+        
+        .logout-spinner {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            border: 6px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .logout-spinner-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .logout-spinner-subtext {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            animation: fadeInOut 2s ease-in-out infinite;
+        }
+        
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
     </style>
     
     <?php echo $__env->yieldContent('styles'); ?>
 </head>
 <body>
+    <!-- Logout Loading Spinner Overlay -->
+    <div class="logout-loading-overlay" id="logoutLoadingOverlay" style="display: none;">
+        <div class="logout-spinner-container">
+            <div class="logout-spinner"></div>
+            <div class="logout-spinner-text">Logging you out<span class="loading-dots"></span></div>
+            <div class="logout-spinner-subtext">Please wait a moment</div>
+        </div>
+    </div>
+    
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
@@ -2498,7 +2592,7 @@
                                     <i class="fas fa-user"></i>
                                     <span>My Profile</span>
                                 </a>
-                                <a href="<?php echo e(route('users.edit', auth()->id())); ?>" class="user-profile-item">
+                                <a href="<?php echo e(route('risks.settings')); ?>" class="user-profile-item">
                                     <i class="fas fa-cog"></i>
                                     <span>Settings</span>
                                 </a>
@@ -2516,7 +2610,7 @@
                     </div>
                     
                     <!-- Mobile Logout Button -->
-                    <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;">
+                    <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;" id="mobileLogoutForm" onsubmit="showLogoutSpinner(event)">
                         <?php echo csrf_field(); ?>
                         <button type="submit" class="mobile-logout-btn" title="Logout">
                             <i class="fas fa-sign-out-alt"></i>
@@ -2526,20 +2620,14 @@
             </div>
             
             <!-- Desktop Header -->
-            <div class="d-none d-lg-flex w-100">
-                <div class="top-bar-left">
-                    <button class="sidebar-toggle-btn" id="sidebarToggleBtn">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-                
+            <div class="d-none d-lg-flex w-100 justify-content-end">
                 <!-- Compact Profile Circle -->
                 <div class="compact-profile">
                     <div class="dropdown">
                         <div class="profile-circle dropdown-toggle" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Profile & Actions">
                             <?php echo e(getInitials(auth()->user()->name ?? 'U')); ?>
 
-                            <span class="notification-indicator" id="total-notifications">3</span>
+                            <span class="notification-indicator" id="total-notifications" style="display: none;">0</span>
                         </div>
                         
                         <div class="dropdown-menu profile-dropdown" aria-labelledby="profileDropdown">
@@ -2561,7 +2649,7 @@
                                 <span>My Profile</span>
                             </a>
                             
-                            <a href="<?php echo e(route('users.edit', auth()->id())); ?>" class="dropdown-item">
+                            <a href="<?php echo e(route('risks.settings')); ?>" class="dropdown-item">
                                 <i class="fas fa-cog"></i>
                                 <span>Settings</span>
                             </a>
@@ -2569,11 +2657,11 @@
                             <div class="dropdown-divider"></div>
                             
                             <!-- Notifications -->
-                            <div class="dropdown-item" onclick="toggleNotificationDropdown()" style="cursor: pointer;">
+                            <a href="#" class="dropdown-item" id="view-notifications-link" onclick="event.preventDefault(); openNotificationPanel();">
                                 <i class="fas fa-bell"></i>
                                 <span>Notifications</span>
-                                <span class="notification-badge ms-auto" id="dropdown-notification-count">2</span>
-                            </div>
+                                <span class="notification-badge ms-auto" id="dropdown-notification-count">0</span>
+                            </a>
                             
                             <!-- Messages -->
                             <a href="<?php echo e(route('messages.index')); ?>" class="dropdown-item">
@@ -2599,7 +2687,7 @@
                             <div class="dropdown-divider"></div>
                             
                             <!-- Logout -->
-                            <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;">
+                            <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline;" id="desktopLogoutForm" onsubmit="showLogoutSpinner(event)">
                                 <?php echo csrf_field(); ?>
                                 <button type="submit" class="dropdown-item logout" style="width: 100%; border: none; background: none; text-align: left;">
                                     <i class="fas fa-sign-out-alt"></i>
@@ -2797,69 +2885,15 @@
     <!-- Sidebar Toggle JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
             const sidebar = document.querySelector('.sidebar');
             const mainContent = document.querySelector('.main-content-wrapper');
             
-            if (!sidebarToggleBtn || !sidebar || !mainContent) {
+            if (!sidebar || !mainContent) {
                 console.warn('Sidebar elements not found');
                 return;
             }
             
-            const toggleIcon = sidebarToggleBtn.querySelector('i');
-            
-            if (!toggleIcon) {
-                console.warn('Toggle icon not found');
-                return;
-            }
-            
-            // Load saved preference from localStorage
-            const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (sidebarCollapsed) {
-                sidebar.classList.add('collapsed');
-                mainContent.classList.add('expanded');
-                toggleIcon.classList.remove('fa-bars');
-                toggleIcon.classList.add('fa-times');
-            }
-            
-            // Toggle sidebar (desktop only)
-            sidebarToggleBtn.addEventListener('click', function() {
-                // Only work on desktop screens
-                if (window.innerWidth > 1024) {
-                    sidebar.classList.toggle('collapsed');
-                    mainContent.classList.toggle('expanded');
-                    
-                    // Update icon
-                    if (sidebar.classList.contains('collapsed')) {
-                        toggleIcon.classList.remove('fa-bars');
-                        toggleIcon.classList.add('fa-times');
-                        localStorage.setItem('sidebarCollapsed', 'true');
-                    } else {
-                        toggleIcon.classList.remove('fa-times');
-                        toggleIcon.classList.add('fa-bars');
-                        localStorage.setItem('sidebarCollapsed', 'false');
-                    }
-                }
-            });
-            
-            // Add hover effect for collapsed sidebar
-            sidebar.addEventListener('mouseenter', function() {
-                if (sidebar.classList.contains('collapsed') && window.innerWidth > 1024) {
-                    sidebar.style.width = '220px';
-                    sidebar.querySelector('.sidebar-header h4').style.display = 'block';
-                    sidebar.querySelector('.sidebar-header p').style.display = 'block';
-                    sidebar.querySelectorAll('.nav-link span').forEach(span => span.style.display = 'inline');
-                }
-            });
-            
-            sidebar.addEventListener('mouseleave', function() {
-                if (sidebar.classList.contains('collapsed') && window.innerWidth > 1024) {
-                    sidebar.style.width = '70px';
-                    sidebar.querySelector('.sidebar-header h4').style.display = 'none';
-                    sidebar.querySelector('.sidebar-header p').style.display = 'none';
-                    sidebar.querySelectorAll('.nav-link span').forEach(span => span.style.display = 'none');
-                }
-            });
+            // Sidebar is now always visible (toggle functionality removed)
             
             // Optimized mobile/tablet menu functionality
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -2900,44 +2934,7 @@
             // Initial sync only
             syncMobileCounts();
             
-            // Keyboard shortcut (Ctrl/Cmd + B)
-            document.addEventListener('keydown', function(e) {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
-                    e.preventDefault();
-                    sidebarToggleBtn.click();
-                }
-            });
-            
-            // Handle responsive behavior
-            function handleResize() {
-                if (window.innerWidth <= 1024) {
-                    // Mobile/tablet behavior - hide sidebar completely
-                    sidebar.classList.add('collapsed');
-                    mainContent.classList.add('expanded');
-                    sidebar.classList.remove('show'); // Remove mobile show class
-                    const overlay = document.getElementById('sidebarOverlay');
-                    if (overlay) overlay.classList.remove('show');
-                    document.body.style.overflow = '';
-                } else {
-                    // Desktop behavior - restore saved preference
-                    const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-                    if (sidebarCollapsed) {
-                        sidebar.classList.add('collapsed');
-                        mainContent.classList.add('expanded');
-                        toggleIcon.classList.remove('fa-bars');
-                        toggleIcon.classList.add('fa-times');
-                    } else {
-                        sidebar.classList.remove('collapsed');
-                        mainContent.classList.remove('expanded');
-                        toggleIcon.classList.remove('fa-times');
-                        toggleIcon.classList.add('fa-bars');
-                    }
-                }
-            }
-            
-            // Check on load and resize
-            handleResize();
-            window.addEventListener('resize', handleResize);
+            // Sidebar is always visible on desktop (no collapse functionality)
             
             // Load unread message count with a small delay to ensure auth is ready
             // Only load if not already loading from another page
@@ -3096,168 +3093,6 @@
                 loadUnreadMessageCount();
             }
         };
-        
-        // Optimized function to load unread notification count
-        function loadUnreadNotificationCount() {
-            // Prevent multiple simultaneous requests
-            if (notificationCountRequestInProgress) {
-                return;
-            }
-            
-            // Only load if user is authenticated (check for CSRF token)
-            const csrfToken = document.querySelector('meta[name="csrf-token"]');
-            if (!csrfToken) {
-                return; // User not authenticated, skip loading
-            }
-
-            notificationCountRequestInProgress = true;
-            
-            fetch('/notifications/unread-count', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (response.status === 401 || response.status === 403) {
-                    // User not authenticated, stop trying
-                    return;
-                }
-                return response.ok ? response.json() : Promise.reject('Failed');
-            })
-            .then(data => {
-                if (!data) return; // No data if not authenticated
-                
-                const notificationCountElement = document.getElementById('notification-count');
-                if (notificationCountElement) {
-                    const count = data.count || 0;
-                    notificationCountElement.textContent = count;
-                    notificationCountElement.style.display = count > 0 ? 'flex' : 'none';
-                }
-            })
-            .catch(() => {
-                // Silently fail - don't spam console
-                const notificationCountElement = document.getElementById('notification-count');
-                if (notificationCountElement) {
-                    notificationCountElement.style.display = 'none';
-                }
-            })
-            .finally(() => {
-                notificationCountRequestInProgress = false;
-            });
-        }
-        
-        // Function to load notifications
-        function loadNotifications() {
-            const notificationList = document.getElementById('notification-list');
-            if (!notificationList) return;
-            
-            notificationList.innerHTML = '<div class="notification-loading"><i class="fas fa-spinner fa-spin"></i> Loading notifications...</div>';
-            
-            fetch('<?php echo e(route("notifications.recent")); ?>', {
-                method: 'GET',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.notifications && data.notifications.length > 0) {
-                    notificationList.innerHTML = data.notifications.map(notification => `
-                        <div class="notification-item ${notification.read ? '' : 'unread'}" onclick="handleNotificationClick(${notification.id}, '${notification.action_url}')">
-                            <div class="notification-icon ${notification.type}">
-                                <i class="${getNotificationIcon(notification.type)}"></i>
-                            </div>
-                            <div class="notification-content">
-                                <div class="notification-item-title">
-                                    ${notification.title}
-                                    <span class="notification-priority ${notification.priority}">${notification.priority}</span>
-                                </div>
-                                <div class="notification-item-message">${notification.message}</div>
-                                <div class="notification-item-time">${notification.time_ago}</div>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    notificationList.innerHTML = `
-                        <div class="notification-empty">
-                            <i class="fas fa-bell-slash"></i>
-                            <div>No notifications</div>
-                        </div>
-                    `;
-                }
-            })
-            .catch(error => {
-                console.error('Error loading notifications:', error);
-                notificationList.innerHTML = '<div class="notification-empty">Error loading notifications</div>';
-            });
-        }
-        
-        // Function to get notification icon
-        function getNotificationIcon(type) {
-            const icons = {
-                'message': 'fas fa-envelope',
-                'risk': 'fas fa-exclamation-triangle',
-                'client': 'fas fa-user',
-                'system': 'fas fa-cog',
-                'approval': 'fas fa-clipboard-check',
-                'report': 'fas fa-chart-bar'
-            };
-            return icons[type] || 'fas fa-bell';
-        }
-        
-        // Function to handle notification click
-        function handleNotificationClick(notificationId, actionUrl) {
-            // Mark as read
-            markNotificationAsRead(notificationId);
-            
-            // Navigate to action URL if provided
-            if (actionUrl) {
-                window.location.href = actionUrl;
-            }
-        }
-        
-        // Function to mark notification as read
-        function markNotificationAsRead(notificationId) {
-            fetch(`/notifications/${notificationId}/mark-read`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Reload notifications
-                    loadNotifications();
-                    // Update count
-                    loadUnreadNotificationCount();
-                }
-            })
-            .catch(error => console.error('Error marking notification as read:', error));
-        }
-        
-        // Function to mark all notifications as read
-        function markAllNotificationsAsRead() {
-            fetch('<?php echo e(route("notifications.mark-all-read")); ?>', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    loadNotifications();
-                    loadUnreadNotificationCount();
-                }
-            })
-            .catch(error => console.error('Error marking all notifications as read:', error));
-        }
         
         // Function to clear all notifications
         function clearAllNotifications() {
@@ -3835,6 +3670,235 @@
             });
             
             modal.show();
+        }
+        
+        // Notification Panel Functions
+        function openNotificationPanel() {
+            const modalHtml = `
+                <div class="modal fade" id="notificationModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background: var(--logo-dark-blue-primary); color: white;">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-bell me-2"></i>Notifications
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body" id="notificationModalBody" style="max-height: 60vh; overflow-y: auto;">
+                                <div class="text-center py-4">
+                                    <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                                    <p class="mt-2">Loading notifications...</p>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="markAllAsRead()">
+                                    <i class="fas fa-check-double"></i> Mark All Read
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const existingModal = document.getElementById('notificationModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modalElement = document.getElementById('notificationModal');
+            const modal = new bootstrap.Modal(modalElement);
+            
+            modalElement.addEventListener('shown.bs.modal', function() {
+                loadNotifications();
+            });
+            
+            modalElement.addEventListener('hidden.bs.modal', function() {
+                modal.dispose();
+                modalElement.remove();
+                loadUnreadNotificationCount(); // Refresh count
+            });
+            
+            modal.show();
+        }
+        
+        async function loadNotifications() {
+            const modalBody = document.getElementById('notificationModalBody');
+            
+            try {
+                const response = await fetch('/notifications');
+                const data = await response.json();
+                
+                if (!data.notifications || data.notifications.length === 0) {
+                    modalBody.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No notifications yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '<div class="list-group list-group-flush">';
+                data.notifications.forEach(notification => {
+                    const isUnread = !notification.read;
+                    const iconClass = getNotificationIcon(notification.type);
+                    const priorityBadge = notification.priority !== 'normal' ? 
+                        `<span class="badge badge-${notification.priority} ms-2">${notification.priority}</span>` : '';
+                    
+                    html += `
+                        <div class="list-group-item ${isUnread ? 'list-group-item-primary' : ''}" 
+                             onclick="handleNotificationItemClick(${notification.id}, '${notification.action_url || ''}')"
+                             style="cursor: pointer;">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="${iconClass} fa-lg"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h6 class="mb-1">${notification.title}${priorityBadge}</h6>
+                                        ${isUnread ? '<span class="badge bg-primary rounded-pill">New</span>' : ''}
+                                    </div>
+                                    <p class="mb-1 small">${notification.message}</p>
+                                    <small class="text-muted">${formatTimeAgo(notification.created_at)}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                modalBody.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                modalBody.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-circle fa-3x text-danger mb-3"></i>
+                        <p class="text-danger">Failed to load notifications</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function handleNotificationItemClick(notificationId, actionUrl) {
+            await markNotificationAsRead(notificationId);
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('notificationModal'));
+            if (modal) {
+                modal.hide();
+            }
+            
+            if (actionUrl) {
+                window.location.href = actionUrl;
+            }
+        }
+        
+        async function markAllAsRead() {
+            try {
+                const response = await fetch('/notifications/mark-all-read', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    loadNotifications();
+                    loadUnreadNotificationCount();
+                }
+            } catch (error) {
+                console.error('Error marking all as read:', error);
+            }
+        }
+        
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString();
+        }
+        
+        // Update notification count to show ONLY unread notifications
+        function loadUnreadNotificationCount() {
+            if (notificationCountRequestInProgress) {
+                return;
+            }
+            
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfToken) {
+                return;
+            }
+            
+            notificationCountRequestInProgress = true;
+            
+            fetch('/notifications/unread-count', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken.getAttribute('content')
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                notificationCountRequestInProgress = false;
+                return response.ok ? response.json() : Promise.reject('Failed');
+            })
+            .then(data => {
+                if (!data) return;
+                
+                const count = data.count || 0;
+                
+                // Update all notification count elements
+                const elements = [
+                    'notification-count',
+                    'dropdown-notification-count',
+                    'mobile-notification-count',
+                    'total-notifications'
+                ];
+                
+                elements.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = count;
+                        el.style.display = count > 0 ? 'flex' : 'none';
+                    }
+                });
+            })
+            .catch(() => {
+                notificationCountRequestInProgress = false;
+            });
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUnreadNotificationCount();
+            // Refresh notification count every 30 seconds
+            setInterval(loadUnreadNotificationCount, 30000);
+        });
+        
+        // Show logout spinner when logging out
+        function showLogoutSpinner(event) {
+            const overlay = document.getElementById('logoutLoadingOverlay');
+            if (overlay) {
+                overlay.classList.add('active');
+                overlay.style.display = 'flex';
+            }
+            
+            // Optional: disable all other interactions
+            document.body.style.overflow = 'hidden';
+            
+            // Let the form submit normally
+            return true;
         }
     </script>
     

@@ -22,12 +22,18 @@ class DashboardUpdateController extends Controller
         $rejected = Client::where('assessment_status', 'rejected')->count();
         $pending = Client::where('assessment_status', 'pending')->count();
 
+        // Count high risk clients properly - including High, High-risk, Very High-risk, and Critical
+        $highRiskClients = Client::where(function($query) {
+            $query->where('overall_risk_rating', 'LIKE', '%High%')
+                  ->orWhere('overall_risk_rating', 'Critical');
+        })->whereNull('deleted_at')->count();
+        
         $data = [
             // Total risks should match the number of current client assessments (unique clients)
             'totalRisks' => $approved + $rejected + $pending,
-            'highRisks' => Client::whereIn('overall_risk_rating', ['High','Critical'])->count(),
-            'mediumRisks' => Client::where('overall_risk_rating', 'Medium')->count(),
-            'lowRisks' => Client::where('overall_risk_rating', 'Low')->count(),
+            'highRisks' => $highRiskClients,
+            'mediumRisks' => Client::where('overall_risk_rating', 'LIKE', '%Medium%')->whereNull('deleted_at')->count(),
+            'lowRisks' => Client::where('overall_risk_rating', 'LIKE', '%Low%')->whereNull('deleted_at')->count(),
             'openRisks' => Risk::where('status', 'Open')->whereNull('deleted_at')->count(),
             'closedRisks' => Risk::where('status', 'Closed')->whereNull('deleted_at')->count(),
             'totalUsers' => User::count(),
@@ -35,7 +41,7 @@ class DashboardUpdateController extends Controller
             'totalClients' => $approved, // Approved clients on card
             'activeClients' => $approved, // Fixed: Use approved clients, not Active status
             'rejectedClients' => $rejected,
-            'highRiskClients' => Client::whereIn('overall_risk_rating', ['High','Critical'])->count(),
+            'highRiskClients' => $highRiskClients,
             'overdueItems' => Risk::where('status', 'Open')->where('created_at', '<', now()->subDays(7))->whereNull('deleted_at')->count(),
             'recentActivities' => $this->getRecentActivities(),
         ];

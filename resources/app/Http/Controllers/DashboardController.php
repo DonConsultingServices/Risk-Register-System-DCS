@@ -25,19 +25,25 @@ class DashboardController extends Controller
             $dashboardData = AdvancedCacheService::getDashboardStats(auth()->id());
             
             // Get recent risks with optimized caching
-            $recentRisks = AdvancedCacheService::getRecentRisks(5);
-            $dashboardData['recentRisks'] = collect($recentRisks);
-
+            try {
+                $recentRisks = AdvancedCacheService::getRecentRisks(5);
+                $dashboardData['recentRisks'] = collect($recentRisks);
+            } catch (\Exception $e) {
+                Log::error('Error getting recent risks: ' . $e->getMessage());
+                $dashboardData['recentRisks'] = collect();
+            }
+            
             return view('dashboard', $dashboardData);
 
         } catch (\Exception $e) {
             Log::error('Dashboard error: ' . $e->getMessage());
+            Log::error('Dashboard error trace: ' . $e->getTraceAsString());
             
             // Return fallback data
             return view('dashboard', [
                 'totalRisks' => 0,
                 'activeClients' => 0,
-                'highRiskItems' => 0,
+                'highRiskClients' => 0,
                 'overdueItems' => 0,
                 'highRisks' => 0,
                 'mediumRisks' => 0,
@@ -50,7 +56,6 @@ class DashboardController extends Controller
                 'userRoles' => 0,
                 'recentLogins' => 0,
                 'totalClients' => 0,
-                'highRiskClients' => 0,
                 'riskMatrix' => [],
                 'error' => 'Unable to load dashboard data. Please try again.'
             ]);
@@ -66,7 +71,10 @@ class DashboardController extends Controller
             $stats = [
                 'totalRisks' => Risk::whereNull('deleted_at')->count(),
                 'activeClients' => Client::where('assessment_status', 'approved')->count(),
-                'highRiskItems' => Risk::where('risk_rating', 'High')->whereNull('deleted_at')->count(),
+                'highRiskClients' => Client::where(function($query) {
+                    $query->where('overall_risk_rating', 'LIKE', '%High%')
+                          ->orWhere('overall_risk_rating', 'Critical');
+                })->whereNull('deleted_at')->count(),
                 'overdueItems' => Risk::where('due_date', '<', now())->where('status', '!=', 'Closed')->whereNull('deleted_at')->count(),
             ];
 
@@ -76,7 +84,7 @@ class DashboardController extends Controller
             return response()->json([
                 'totalRisks' => 0,
                 'activeClients' => 0,
-                'highRiskItems' => 0,
+                'highRiskClients' => 0,
                 'overdueItems' => 0,
             ]);
         }

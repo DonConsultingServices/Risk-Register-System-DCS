@@ -21,44 +21,51 @@ class AdvancedCacheService
      */
     public static function getDashboardStats($userId)
     {
-        $cacheKey = "dashboard_stats_v2_{$userId}";
+        $cacheKey = "dashboard_stats_v4_{$userId}";
         
-        return Cache::remember($cacheKey, self::TTL_MEDIUM, function() {
-            // Single optimized query for all dashboard stats
-            $stats = DB::select("
-                SELECT 
-                    (SELECT COUNT(*) FROM clients WHERE deleted_at IS NULL) as total_assessments,
-                    (SELECT COUNT(*) FROM risks WHERE status = 'Open' AND deleted_at IS NULL) as open_risks,
-                    (SELECT COUNT(*) FROM risks WHERE status = 'Closed' AND deleted_at IS NULL) as closed_risks,
-                    (SELECT COUNT(*) FROM clients WHERE overall_risk_rating LIKE '%High%' AND deleted_at IS NULL) as high_risks,
-                    (SELECT COUNT(*) FROM clients WHERE overall_risk_rating = 'Critical' AND deleted_at IS NULL) as critical_risks,
-                    (SELECT COUNT(*) FROM clients WHERE overall_risk_rating LIKE '%Medium%' AND deleted_at IS NULL) as medium_risks,
-                    (SELECT COUNT(*) FROM clients WHERE overall_risk_rating LIKE '%Low%' AND deleted_at IS NULL) as low_risks,
-                    (SELECT COUNT(*) FROM clients WHERE assessment_status = 'approved' AND deleted_at IS NULL) as approved_clients,
-                    (SELECT COUNT(*) FROM clients WHERE assessment_status = 'pending' AND deleted_at IS NULL) as pending_clients,
-                    (SELECT COUNT(*) FROM clients WHERE assessment_status = 'rejected' AND deleted_at IS NULL) as rejected_clients,
-                    (SELECT COUNT(*) FROM users WHERE is_active = 1) as active_users,
-                    (SELECT COUNT(*) FROM risks WHERE due_date < NOW() AND status != 'Closed' AND deleted_at IS NULL) as overdue_risks
-            ")[0];
+        return Cache::remember($cacheKey, self::TTL_SHORT, function() {
+        // Use Eloquent for more reliable queries
+        $totalClients = \App\Models\Client::whereNull('deleted_at')->count();
+        $approvedClients = \App\Models\Client::where('assessment_status', 'approved')->whereNull('deleted_at')->count();
+        $pendingClients = \App\Models\Client::where('assessment_status', 'pending')->whereNull('deleted_at')->count();
+        $rejectedClients = \App\Models\Client::where('assessment_status', 'rejected')->whereNull('deleted_at')->count();
+        
+        // Count high risk clients - including High, High-risk, Very High-risk, and Critical
+        $highRiskClients = \App\Models\Client::where(function($query) {
+            $query->where('overall_risk_rating', 'LIKE', '%High%')
+                  ->orWhere('overall_risk_rating', 'Critical');
+        })->whereNull('deleted_at')->count();
+        
+        $mediumRiskClients = \App\Models\Client::where('overall_risk_rating', 'LIKE', '%Medium%')
+            ->whereNull('deleted_at')->count();
+        $lowRiskClients = \App\Models\Client::where('overall_risk_rating', 'LIKE', '%Low%')
+            ->whereNull('deleted_at')->count();
+        
+        $openRisks = \App\Models\Risk::where('status', 'Open')->whereNull('deleted_at')->count();
+        $closedRisks = \App\Models\Risk::where('status', 'Closed')->whereNull('deleted_at')->count();
+        $overdueRisks = \App\Models\Risk::where('due_date', '<', now())
+            ->where('status', '!=', 'Closed')
+            ->whereNull('deleted_at')->count();
+        
+        $activeUsers = \App\Models\User::where('is_active', 1)->count();
 
-            return [
-                // Use clients table as the single source of truth
-                'totalRisks' => $stats->total_assessments,
-                'activeClients' => $stats->approved_clients,
-                'totalClients' => $stats->approved_clients + $stats->rejected_clients + $stats->pending_clients,
-                'openRisks' => $stats->open_risks,
-                'closedRisks' => $stats->closed_risks,
-                'highRisks' => $stats->high_risks,
-                'criticalRisks' => $stats->critical_risks,
-                'mediumRisks' => $stats->medium_risks,
-                'lowRisks' => $stats->low_risks,
-                'highRiskItems' => $stats->high_risks + $stats->critical_risks,
-                'overdueItems' => $stats->overdue_risks,
-                'pendingClientAssessments' => $stats->pending_clients,
-                'rejectedClients' => $stats->rejected_clients,
-                'totalUsers' => $stats->active_users,
-                'activeUsers' => $stats->active_users,
-            ];
+        return [
+            'totalRisks' => $totalClients,
+            'activeClients' => $approvedClients,
+            'totalClients' => $totalClients,
+            'openRisks' => $openRisks,
+            'closedRisks' => $closedRisks,
+            'highRisks' => $highRiskClients,
+            'criticalRisks' => 0, // Included in highRiskClients
+            'mediumRisks' => $mediumRiskClients,
+            'lowRisks' => $lowRiskClients,
+            'highRiskClients' => $highRiskClients,
+            'overdueItems' => $overdueRisks,
+            'pendingClientAssessments' => $pendingClients,
+            'rejectedClients' => $rejectedClients,
+            'totalUsers' => $activeUsers,
+            'activeUsers' => $activeUsers,
+        ];
         });
     }
 

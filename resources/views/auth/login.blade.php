@@ -1151,9 +1151,99 @@
                 border-width: 1px;
             }
         }
+        
+        /* Loading Spinner Overlay */
+        .login-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 7, 45, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-loading-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .login-spinner-container {
+            text-align: center;
+            color: white;
+            animation: scaleIn 0.5s ease-out;
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .login-spinner {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            border: 6px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .login-spinner-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .login-spinner-subtext {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            animation: fadeInOut 2s ease-in-out infinite;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        /* Loading dots animation */
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
     </style>
 </head>
 <body>
+    <!-- Loading Spinner Overlay -->
+    <div class="login-loading-overlay" id="loginLoadingOverlay">
+        <div class="login-spinner-container">
+            <div class="login-spinner"></div>
+            <div class="login-spinner-text">Logging you in<span class="loading-dots"></span></div>
+            <div class="login-spinner-subtext">Please wait while we authenticate your credentials</div>
+        </div>
+    </div>
+    
     <!-- Enhanced Visual Effects -->
     <div class="bg-shapes">
         <div class="shape"></div>
@@ -1223,7 +1313,7 @@
                         </div>
                     @endif
                     
-                    <form method="POST" action="{{ route('login') }}">
+                    <form method="POST" action="{{ route('login') }}" id="loginForm">
                         @csrf
                         
                         <div class="form-group">
@@ -1290,6 +1380,26 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        // Show loading spinner on form submit
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loadingOverlay = document.getElementById('loginLoadingOverlay');
+            
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    // Show loading overlay
+                    loadingOverlay.classList.add('active');
+                    
+                    // Disable submit button to prevent double submission
+                    const submitBtn = loginForm.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Logging in...';
+                    }
+                });
+            }
+        });
+        
         // Password toggle functionality
         function togglePassword() {
             const passwordInput = document.getElementById('password');

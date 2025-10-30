@@ -1,3 +1,5 @@
+
+
 <?php $__env->startSection('title', 'Dashboard - DCS-Best'); ?>
 <?php $__env->startSection('page-title', 'Dashboard'); ?>
 
@@ -583,14 +585,21 @@
         <div class="welcome-time" id="currentTime"></div>
     </div>
 
-    <!-- Quick User Guide -->
+    <!-- Quick User Guide (Collapsible) -->
     <div class="alert alert-info border-0 shadow-sm mb-4">
         <div class="d-flex align-items-start">
             <i class="fas fa-question-circle fa-2x me-3 mt-1" style="color: #00072D;"></i>
             <div style="flex: 1;">
-                <h5 class="alert-heading mb-3"><strong><i class="fas fa-book-open me-2"></i>Quick Start Guide</strong></h5>
+                <h5 class="alert-heading mb-0" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#quickGuideContent" aria-expanded="false" onclick="toggleGuideChevron()">
+                    <strong>
+                        <i class="fas fa-book-open me-2"></i>Quick Start Guide
+                        <i class="fas fa-chevron-down float-end" id="guideChevron" style="transition: transform 0.3s ease; display: inline-block;"></i>
+                    </strong>
+                </h5>
                 
-                <div class="row">
+                <div class="collapse" id="quickGuideContent">
+                    <hr class="my-3">
+                    <div class="row">
                     <div class="col-md-6 mb-3">
                         <h6 class="text-primary mb-2"><i class="fas fa-user-plus me-2"></i>1. Add a New Client Assessment</h6>
                         <ul style="font-size: 0.95rem; line-height: 1.8;">
@@ -632,11 +641,12 @@
                     </div>
                 </div>
                 
-                <div class="mt-2 p-2 bg-light rounded">
-                    <small class="text-muted">
-                        <i class="fas fa-lightbulb me-1"></i>
-                        <strong>Tip:</strong> All navigation items are in the left sidebar. Click on any menu item to access different sections of the system.
-                    </small>
+                    <div class="mt-2 p-2 bg-light rounded">
+                        <small class="text-muted">
+                            <i class="fas fa-lightbulb me-1"></i>
+                            <strong>Tip:</strong> All navigation items are in the left sidebar. Click on any menu item to access different sections of the system.
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -669,8 +679,8 @@
         <a href="<?php echo e(route('risks.reports', ['filter' => 'high_risk'])); ?>" class="stat-card warning clickable-stat">
             <div class="stat-content">
                 <div class="stat-info">
-                    <h3 id="high-risk-items"><?php echo e($highRiskItems ?? 0); ?></h3>
-                    <p>High Risk Items</p>
+                    <h3 id="high-risk-clients"><?php echo e($highRiskClients ?? 0); ?></h3>
+                    <p>High Risk Clients</p>
                 </div>
                 <i class="fas fa-exclamation-circle stat-icon"></i>
             </div>
@@ -815,7 +825,7 @@ function updateDashboardStats(data) {
     updateStatCard('total-risks', data.totalRisks);
     updateStatCard('active-clients', data.activeClients);
     
-    updateStatCard('high-risk-items', data.highRisks);
+    updateStatCard('high-risk-clients', data.highRiskClients || data.highRisks);
     updateStatCard('overdue-items', data.overdueItems || 0);
 }
 
@@ -983,6 +993,39 @@ async function clearAllCaches() {
 // Cleanup on page unload
 window.addEventListener('beforeunload', function() {
     stopRealTimeUpdates();
+});
+
+// Quick Guide Collapse Toggle - Rotate chevron
+let guideExpanded = false;
+
+function toggleGuideChevron() {
+    const guideChevron = document.getElementById('guideChevron');
+    if (guideChevron) {
+        guideExpanded = !guideExpanded;
+        if (guideExpanded) {
+            guideChevron.style.transform = 'rotate(180deg)';
+        } else {
+            guideChevron.style.transform = 'rotate(0deg)';
+        }
+    }
+}
+
+// Also listen to Bootstrap collapse events for edge cases
+document.addEventListener('DOMContentLoaded', function() {
+    const quickGuideContent = document.getElementById('quickGuideContent');
+    const guideChevron = document.getElementById('guideChevron');
+    
+    if (quickGuideContent && guideChevron) {
+        quickGuideContent.addEventListener('shown.bs.collapse', function() {
+            guideExpanded = true;
+            guideChevron.style.transform = 'rotate(180deg)';
+        });
+        
+        quickGuideContent.addEventListener('hidden.bs.collapse', function() {
+            guideExpanded = false;
+            guideChevron.style.transform = 'rotate(0deg)';
+        });
+    }
 });
 </script>
 <?php $__env->stopSection(); ?>
