@@ -1,0 +1,204 @@
+/* ===== DCS Logo Color Scheme ===== */
+
+:root {
+    /* Primary Colors - Dark Navy Blue */
+    --logo-dark-blue-primary: #00072D;
+    --logo-dark-blue-hover: #000a3a;
+    --logo-dark-blue-secondary: #001066;
+    --logo-dark-blue-light: #001a80;
+    
+    /* Secondary Colors */
+    --logo-medium-blue: #64748b;
+    --logo-light-blue: #94a3b8;
+    --logo-lighter-blue: #cbd5e1;
+    
+    /* Accent Colors */
+    --logo-red: #dc2626;
+    --logo-red-hover: #b91c1c;
+    --logo-orange: #ea580c;
+    --logo-yellow: #ca8a04;
+    --logo-green: #16a34a;
+    
+    /* Background Colors */
+    --logo-white: #ffffff;
+    --logo-light-bg: #f8fafc;
+    --logo-medium-bg: #e2e8f0;
+    --logo-dark-bg: #1e293b;
+    
+    /* Text Colors */
+    --logo-text-dark: #1e293b;
+    --logo-text-medium: #475569;
+    --logo-text-light: #64748b;
+    --logo-text-muted: #94a3b8;
+    
+    /* Status Colors */
+    --logo-success: #16a34a;
+    --logo-warning: #ca8a04;
+    --logo-danger: #dc2626;
+    --logo-info: #0891b2;
+    
+    /* Border Colors */
+    --logo-border-light: #e2e8f0;
+    --logo-border-medium: #cbd5e1;
+    --logo-border-dark: #94a3b8;
+    
+    /* Shadow Colors */
+    --logo-shadow-light: rgba(30, 58, 138, 0.1);
+    --logo-shadow-medium: rgba(30, 58, 138, 0.2);
+    --logo-shadow-dark: rgba(30, 58, 138, 0.3);
+}
+
+/* ===== Essential Utility Classes ===== */
+
+.text-logo-primary { color: var(--logo-dark-blue-primary) !important; }
+.text-logo-success { color: var(--logo-success) !important; }
+.text-logo-warning { color: var(--logo-warning) !important; }
+.text-logo-danger { color: var(--logo-danger) !important; }
+.text-logo-info { color: var(--logo-info) !important; }
+
+.bg-logo-primary { background-color: var(--logo-dark-blue-primary) !important; }
+.bg-logo-success { background-color: var(--logo-success) !important; }
+.bg-logo-warning { background-color: var(--logo-warning) !important; }
+.bg-logo-danger { background-color: var(--logo-danger) !important; }
+.bg-logo-info { background-color: var(--logo-info) !important; }
+
+.border-logo-primary { border-color: var(--logo-dark-blue-primary) !important; }
+.border-logo-success { border-color: var(--logo-success) !important; }
+.border-logo-warning { border-color: var(--logo-warning) !important; }
+.border-logo-danger { border-color: var(--logo-danger) !important; }
+.border-logo-info { border-color: var(--logo-info) !important; }
+
+/* ===== Core Button Styles ===== */
+
+.btn-logo-primary {
+    background-color: var(--logo-dark-blue-primary);
+    border-color: var(--logo-dark-blue-primary);
+    color: var(--logo-white);
+}
+
+.btn-logo-primary:hover {
+    background-color: var(--logo-dark-blue-hover);
+    border-color: var(--logo-dark-blue-hover);
+    color: var(--logo-white);
+}
+
+.btn-logo-outline-primary {
+    background-color: transparent;
+    border-color: var(--logo-dark-blue-primary);
+    color: var(--logo-dark-blue-primary);
+}
+
+.btn-logo-outline-primary:hover {
+    background-color: var(--logo-dark-blue-primary);
+    border-color: var(--logo-dark-blue-primary);
+    color: var(--logo-white);
+}
+
+/* ===== Form Element Overrides ===== */
+
+.form-control:focus {
+    border-color: var(--logo-dark-blue-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 7, 45, 0.25);
+}
+
+.form-select:focus {
+    border-color: var(--logo-dark-blue-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 7, 45, 0.25);
+}
+
+/* ===== Alert Overrides ===== */
+
+.alert-primary {
+    background-color: rgba(0, 7, 45, 0.1);
+    border-color: rgba(0, 7, 45, 0.2);
+    color: var(--logo-dark-blue-primary);
+}
+
+.alert-success {
+    background-color: rgba(22, 163, 74, 0.1);
+    border-color: rgba(22, 163, 74, 0.2);
+    color: var(--logo-success);
+}
+
+.alert-warning {
+    background-color: rgba(202, 138, 4, 0.1);
+    border-color: rgba(202, 138, 4, 0.2);
+    color: var(--logo-warning);
+}
+
+.alert-danger {
+    background-color: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.2);
+    color: var(--logo-danger);
+}
+
+.alert-info {
+    background-color: rgba(8, 145, 178, 0.1);
+    border-color: rgba(8, 145, 178, 0.2);
+    color: var(--logo-info);
+}
+
+/* ===== Badge Overrides ===== */
+
+.badge.bg-primary {
+    background-color: var(--logo-dark-blue-primary) !important;
+}
+
+.badge.bg-success {
+    background-color: var(--logo-success) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--logo-warning) !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--logo-danger) !important;
+}
+
+.badge.bg-info {
+    background-color: var(--logo-info) !important;
+}
+
+/* ===== Progress Bar Overrides ===== */
+
+.progress-bar {
+    background-color: var(--logo-dark-blue-primary);
+}
+
+/* ===== Link Overrides ===== */
+
+a {
+    color: var(--logo-dark-blue-primary);
+}
+
+a:hover {
+    color: var(--logo-dark-blue-hover);
+}
+
+/* ===== Focus States ===== */
+
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 7, 45, 0.25);
+}
+
+/* ===== Custom Scrollbar ===== */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--logo-dark-blue-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--logo-dark-blue-hover);
+}

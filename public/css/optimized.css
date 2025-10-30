@@ -1,0 +1,35 @@
+/* Optimized CSS to reduce resource loading */
+
+/* Hide elements that might cause excessive resource requests */
+.sidebar img[src*="logo1.png"] {
+    display: none !important;
+}
+
+/* Optimize image loading */
+img {
+    loading: lazy;
+}
+
+/* Reduce animation complexity to save resources */
+* {
+    animation-duration: 0.3s !important;
+    transition-duration: 0.3s !important;
+}
+
+/* Optimize font loading */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Reduce box-shadow complexity */
+.btn, .card, .sidebar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Optimize gradients */
+.sidebar {
+    background: #000745 !important;
+}
+
+/* Reduce border-radius for better performance */
+.btn, .card, .sidebar {
+    border-radius: 4px !important;
+}
